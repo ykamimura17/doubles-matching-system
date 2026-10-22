@@ -3,6 +3,8 @@ import {useEffect,useMemo,useState} from "react";
 import {onAuthStateChanged,signInAnonymously,signInWithEmailAndPassword,signOut,type User} from "firebase/auth";
 import {doc,onSnapshot} from "firebase/firestore";
 import {getFirebase} from "@/lib/firebase-client";
+import {PlayersPanel} from "@/components/PlayersPanel";
+import {applyPlayerAction} from "@/lib/players.mjs";
 import {CourtCard} from "@/components/CourtCard";
 import type {Player,State} from "@/lib/types";
 import {emptyState} from "@/lib/types";
@@ -42,6 +44,18 @@ export default function Home(){
  }
  if(!user)throw Error("管理者ログインが必要です");const token=await user.getIdToken();const response=await fetch("/api/matches",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.error||"操作に失敗しました");return data}
  async function action(body:Record<string,unknown>){setLoading(true);setError("");try{return await request(body)}catch(e){setError(e instanceof Error?e.message:"操作に失敗しました");return null}finally{setLoading(false)}}
+ async function savePlayerAction(body:Record<string,unknown>){
+  setError("");
+  try{
+   if(e2eMode){setState(current=>applyPlayerAction(current,body));return true;}
+   if(!user)throw Error("管理者ログインが必要です");
+   const token=await user.getIdToken();
+   const response=await fetch("/api/players",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify(body)});
+   const result=await response.json();
+   if(!response.ok)throw Error(result.error||"保存できませんでした");
+   return true;
+  }catch(e){setError(e instanceof Error?e.message:"保存できませんでした");return false;}
+ }
  function openCourt(id:number){setSelected(id);setMode(active.some(c=>c.id===id)?"score":"menu");setIds([0,0,0,0]);setScores([0,4])}
  async function automatic(){if(selected===null)return;const result=await action({action:"preview",courtId:selected});if(result){setIds([...result.teams.teamA,...result.teams.teamB].map((p:Player)=>p.id));setMode("preview")}}
  function manualPreview(){if(ids.some(id=>!id)||new Set(ids).size!==4){setError("待機中の選手4名を重複なく選択してください");return}setError("");setMode("preview")}
@@ -58,7 +72,7 @@ export default function Home(){
  {mode==="preview"&&<><div className="preview"><strong>{names(ids.slice(0,2))}</strong><span>VS</span><strong>{names(ids.slice(2))}</strong></div><div className="action-row"><button disabled={loading} onClick={()=>commit({action:"start",courtId:selected,playerIds:ids})}>この組み合わせで試合開始</button><button className="secondary" onClick={()=>setMode("menu")}>戻る</button></div></>}
  {mode==="score"&&<><div className="preview"><strong>{selectedCourt?.teamA?.map(p=>p.name).join("・")}</strong><span>VS</span><strong>{selectedCourt?.teamB?.map(p=>p.name).join("・")}</strong></div><div className="score-grid">{scores.map((score,i)=><label key={i}>チーム{i===0?"A":"B"}<input type="number" min="0" max="4" value={score} onChange={e=>setScores(old=>old.map((v,j)=>i===j?Number(e.target.value):v))}/></label>)}</div><div className="action-row"><button disabled={loading} onClick={()=>commit({action:"result",courtId:selected,scoreA:scores[0],scoreB:scores[1]})}>結果を登録</button><button className="secondary" disabled={loading} onClick={()=>commit({action:"cancel",courtId:selected})}>試合取消</button></div></>}
  </div>}</section>
- <section id="players" className="panel"><div className="section-heading"><div><small>PLAYERS</small><h2>選手一覧</h2></div><span>{state.players.length} 名</span></div><div className="player-grid">{state.players.map(p=><article className="player" key={p.id}><div><strong>{p.name}</strong><small>{p.level===3?"上級":p.level===2?"中級":"初級"} · {p.status==="waiting"?"待機中":p.status==="playing"?"試合中":"休憩中"}</small></div><div className="player-points"><strong>{p.point} pt</strong><small>{p.win}/{p.lose}/{p.draw}</small></div></article>)}</div></section>
+ <PlayersPanel state={state} admin={admin} save={savePlayerAction}/>
  <section id="ranking" className="panel"><div className="section-heading"><div><small>RANKING</small><h2>ランキング</h2></div><span>ポイント順</span></div>{ranked.map((p,i)=><div className="rank" key={p.id}><span>{String(i+1).padStart(2,"0")}</span><strong>{p.name}</strong><div><b>{p.point} pt</b><small>{p.win}/{p.lose}/{p.draw}</small></div></div>)}<p className="hint">勝利 / 敗北 / 引き分け</p></section>
  <section id="history" className="panel"><div className="section-heading"><div><small>MATCH HISTORY</small><h2>試合履歴</h2></div></div>{state.matchHistory.slice(0,20).map(m=><div className="history" key={m.id}><span>COURT {m.courtId}</span><strong>{m.teamA.join("・")}　{m.scoreA} - {m.scoreB}　{m.teamB.join("・")}</strong></div>)}</section></main></div>;
 }
