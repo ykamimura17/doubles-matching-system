@@ -4,7 +4,7 @@ import {getFirestore} from "firebase-admin/firestore";
 
 const [action,projectArgument,confirmation,uid]=process.argv.slice(2);
 const projectId=process.env.FIREBASE_PROJECT_ID;
-if(!projectId||projectId!==projectArgument||confirmation!=="--confirm-new-project"){
+if(projectId!=="tennis-club-system"||projectId!==projectArgument||confirmation!=="--confirm-new-project"){
  console.error("Usage: FIREBASE_PROJECT_ID=<new-project> node scripts/setup-new-firebase.mjs bootstrap|grant-admin <new-project> --confirm-new-project [ADMIN_UID]");
  process.exit(1);
 }

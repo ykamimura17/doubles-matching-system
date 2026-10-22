@@ -1,5 +1,7 @@
 # 新しい Firebase プロジェクトへの接続
 
+対象プロジェクトは `tennis-club-system`。Firebase App Hosting向けの具体的な手順と未検証事項は [App Hosting接続手順](app-hosting-tennis-club.md) を参照。
+
 ## 接続設計
 
 - ブラウザ: `NEXT_PUBLIC_FIREBASE_*` の Web App 設定を使い、Firebase Authentication と Firestore Web SDK を初期化
