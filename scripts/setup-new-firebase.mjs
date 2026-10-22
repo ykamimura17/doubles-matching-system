@@ -20,7 +20,7 @@ if(action==="bootstrap"){
  if(!uid)throw Error("A Firebase Authentication UID is required");
  const auth=getAuth(app);
  const user=await auth.getUser(uid);
- if(user.providerData.length===0||!user.email)throw Error("The selected user needs an email/password identity");
+ if(!user.email||user.disabled)throw Error("Select an active, non-anonymous user with an email address");
  const claims={...(user.customClaims??{}),admin:true};
  await auth.setCustomUserClaims(uid,claims);
  console.log("Granted admin claim in project",projectId,"for UID",uid);
