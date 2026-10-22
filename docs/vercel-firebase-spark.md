@@ -1,65 +1,57 @@
-# Vercel Hobbyと既存Firebaseへの接続
+# Vercel Hobby + Firebase Spark
 
 ## 対象
 
-Next.jsの画面・管理APIをVercelに配置し、既存HTMLのFirebaseプロジェクト **`loe26d`** の **`system/current`** を使用する。`tennis-club-system` は今回使用しない。Firestoreの新規作成、初期化、データコピーは不要。
+Next.jsをVercelへ配備し、自分のFirebase **`tennis-club-system`** の **`system/current`** を使う。既存HTMLに記載された他者所有の `loe26d` には接続しない。Firebase側のプランはSparkであることを確認する。Google Cloudの請求先アカウントを紐付けるとBlazeへ移行する。今回の構成にApp Hosting、Cloud Run、Cloud Functionsは不要。
 
-Hobbyは個人・非商用用途が条件。Firebaseのプランは既存プロジェクト側で確認する（コード変更でSparkへ変更されるわけではない）。FirebaseとVercelには無料利用枠の上限がある。
+## Firestore
 
-## Vercel設定
+Standard edition、DB ID `(default)` を使用。初期ドキュメント `system/current` は `courtCount` を数値3、`players`、`courts`、`matchHistory`、`pairHistory` を空の配列にする。マップや文字列で作成しない。作成済みデータは上書きしない。空データでは試合開始できないため、検証用選手の準備が必要。選手登録UI/APIなどはNext.js版に未移植。
 
-1. Hobbyアカウントで `ykamimura17/doubles-matching-system` をImportし、Next.js、Root Directory `/`、Node.js 22.xを指定する。
-2. 統合後はmainを配備対象にする。検証用Previewで先に動作を確認する。
-3. `vercel.json` のBuild Commandは環境整合チェック後にNext.jsをビルドする。Install Commandは `npm install`。
-4. `.env.example` の公開Web設定4項目を登録する。値は既存HTMLから転記済み。`NEXT_PUBLIC_*` はビルド時に埋め込まれるので変更時は再デプロイする。
-5. 以下のサーバー用環境変数を登録する。
+新プロジェクトのルールはリポジトリの `firestore.rules` に合わせる。認証済み利用者の `system/current` のgetだけを許可し、直接書込みは禁止する。Admin SDKはルールを迂回するためAPIのadmin claim検証とIAMも必要。今回のコード変更でルールや実データを反映したわけではない。
 
-| 変数 | 値 |
+## Vercel
+
+GitHub `ykamimura17/doubles-matching-system` をImport。Next.js、Root Directory `/`、Node.js 22.x。修正PRの統合後はmainを配備する。Build Commandは `vercel.json` の環境チェック付きコマンドを使用。Install Commandは `npm install`。
+
+環境変数:
+
+| 名前 | 値 |
 |---|---|
-| `FIREBASE_PROJECT_ID` | `loe26d` |
-| `FIREBASE_CLIENT_EMAIL` | `loe26d` 内の専用サービスアカウントのメール |
-| `FIREBASE_PRIVATE_KEY` | 専用サービスアカウントのRSA秘密鍵 |
+| `NEXT_PUBLIC_FIREBASE_PROJECT_ID` | `tennis-club-system` |
+| `NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN` | `tennis-club-system.firebaseapp.com` |
+| `NEXT_PUBLIC_FIREBASE_API_KEY` | このプロジェクトのWebアプリの `apiKey` |
+| `NEXT_PUBLIC_FIREBASE_APP_ID` | 同じWebアプリの `appId` |
+| `FIREBASE_PROJECT_ID` | `tennis-club-system` |
+| `FIREBASE_CLIENT_EMAIL` | 専用サービスアカウントJSONの `client_email` |
+| `FIREBASE_PRIVATE_KEY` | 同じJSONの `private_key` |
 
-専用実行IDにはFirestore操作用の `roles/datastore.user` と失効チェック用の `roles/firebaseauth.viewer` を付与する。Owner、Editor、Authの管理権限は実行IDに付けない。秘密鍵は本人がVercelのSensitive環境変数へ直接登録し、Git・チャット・CIログには載せない。実改行と文字列 `\n` に対応。外側の引用符はVercel入力欄に含めない。
+API key・App IDは旧HTMLの値を使わない。公開設定はFirebaseの「プロジェクト設定→全般→マイアプリ→Webアプリ」で取得。`NEXT_PUBLIC_*` はビルド時に埋め込まれるため、変更後は再デプロイする。
 
-最初の鍵登録先は対象ブランチのPreviewに限定し、無関係なPRに渡さない。Productionへの登録は検証後。`GOOGLE_APPLICATION_CREDENTIALS` と `NEXT_PUBLIC_E2E_MODE` はVercelに設定しない。ローカルではADCも使用できる。
+## サーバー用サービスアカウント
 
-## 既存環境の認証・データ
+Google Cloudコンソールで同じ `tennis-club-system` を選択し、「IAMと管理→サービスアカウント」で `vercel-runtime` 等を作成。`roles/datastore.user` と `roles/firebaseauth.viewer` をプロジェクトで付与する。実行IDにOwner、Editor、Auth管理者権限は付けない。
 
-新プロジェクトで有効化した認証設定は `loe26d` に引き継がれない。既存側で匿名認証とメール/パスワード認証が使えるか確認し、管理者UIDに `admin: true` を付与する必要がある。
+アカウントの「キー→鍵を追加→新しい鍵を作成→JSON」で鍵を取得。本人が `client_email` と `private_key` をVercelへ直接登録する。秘密鍵はSecret/Sensitive扱いにし、Git・チャット・CIログには載せない。PEMは実改行と文字列 `\n` の両方に対応。Vercel入力欄ではJSON外側の引用符を付けない。
 
-専用の運用IDでの例（ADC取得にはGoogle Cloud CLI、偽装にはToken Creator権限が必要）:
+まず検証用ブランチに限定したPreview環境で確認し、Production登録は確認後に行う。無関係なPRへ本番鍵を渡さない。`NEXT_PUBLIC_E2E_MODE` や `GOOGLE_APPLICATION_CREDENTIALS` をVercelに設定しない。ローカルではADCも利用可能。
+
+IAM自体は無料。Google Cloud画面を開いたりサービスアカウントを作ることと、請求先登録は別。課金契約や無料トライアルを開始する必要はない。
+
+## Authenticationとclaim
+
+匿名認証（30日自動削除なし）・メール/パスワード認証はユーザー設定済み。管理者ユーザーを作成し、別の運用IDで `admin: true` を付与する。Vercelの実行IDにはclaim変更権限を追加しない。
 
 ```powershell
 gcloud auth application-default login --impersonate-service-account=SETUP_SERVICE_ACCOUNT_EMAIL
-$env:FIREBASE_PROJECT_ID = 'loe26d'
-node scripts/setup-new-firebase.mjs grant-admin loe26d --confirm-existing-project ADMIN_UID
+$env:FIREBASE_PROJECT_ID = 'tennis-club-system'
+node scripts/setup-new-firebase.mjs grant-admin tennis-club-system --confirm-existing-project ADMIN_UID
 ```
 
-スクリプトのbootstrapは拒否される。既存データには書き込まない。claim付与は既存claimを保持する。付与後に管理者は再ログインする。実行用IDにclaim変更権限を追加しない。
-
-必要なVercelのホスト名をAuthenticationの承認済みドメインで確認する。httpsやパスは入力しない。
-
-## ルールと切替
-
-**既存HTMLはブラウザからFirestoreへ直接書き込む。リポジトリの `firestore.rules` を既存環境にそのまま反映すると、その書込みを拒否する。** 今回はルールを反映していない。既存HTMLの運用を続ける間は、自動deployを追加しない。
-
-Next.js APIは管理者IDトークン・claimを検証して更新するが、既存Firestoreのルールが広く書込みを許可していれば、それは別のアクセス経路として残る。新API導入だけで既存環境全体の権限が強化されるわけではない。
-
-公開切替前に既存データのエクスポート等によるバックアップを確保し、データ形式と読取りを確認する。書込みテストは既存運用データへの影響を管理したうえで行う。既存HTMLとNext.jsの管理操作を同時に行わない。HTMLは全体保存を行うため、新APIの更新を上書きする可能性がある。
-
-選手登録、休憩管理、MVP/SVPなどはNext.js版に未移植。GitHubへのマージと、実際の公開・運用切替は別作業。
+スクリプト名は従来のままだが、bootstrapは禁止。作成済みデータに書き込まない。確認フラグ `--confirm-existing-project` は既に作成済みのプロジェクトを指す。管理者はclaim付与後に再ログインする。必要なVercelのホスト名をAuthの承認済みドメインで確認する。
 
 ## 検証
 
-```sh
-node --env-file=.env.local scripts/check-firebase-config.mjs
-npm run typecheck
-npm test
-npm run build
-npm run test:e2e
-```
+型チェック・単体テスト・build・固定データの正常系E2Eとは別に、実Firebaseで匿名読取り、管理者ログイン、試合開始・結果登録・取消、一般利用者の直接書込み拒否を確認する。環境チェックは値の形式・対象のみで、鍵の有効性・IAMの検証ではない。
 
-環境チェックは値の形式・対象の確認のみ。鍵の有効性、IAM、実Firebase接続は別途確認が必要。CIは本番鍵を使わずビルドし、E2Eは固定データの正常系を確認する。
-
-公式資料: [Hobby](https://vercel.com/docs/plans/hobby)、[Firebase Admin SDK](https://firebase.google.com/docs/admin/setup)
+公式資料: [IAM料金](https://cloud.google.com/iam/pricing)、[Firebaseプラン](https://firebase.google.com/docs/projects/billing/firebase-pricing-plans)、[Admin SDK](https://firebase.google.com/docs/admin/setup)
