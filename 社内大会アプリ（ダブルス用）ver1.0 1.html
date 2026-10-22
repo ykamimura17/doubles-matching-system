@@ -405,6 +405,24 @@ td{overflow-wrap:anywhere}
 @media(max-width:1000px){#courtArea{grid-template-columns:repeat(2,minmax(0,1fr))}.court-surface{height:210px}}
 @media(max-width:650px){body{padding:14px 13px 92px}body>h1{font-size:22px}.card{padding:16px;border-radius:17px}#courtArea{grid-template-columns:1fr}.court-surface{height:190px}.team-overlay{font-size:17px}#appNav{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;border-radius:16px 16px 0 0;padding:7px 5px;padding-bottom:max(8px,env(safe-area-inset-bottom))}#appNav a{font-size:11px;padding:12px 3px}.courts-summary .metric{min-width:0;padding:12px}.metric strong{font-size:23px}table{display:block;overflow-x:auto;white-space:nowrap}#playerTable td .player-record{font-size:10px}.court-menu .teams{grid-template-columns:1fr}#courtArea{gap:12px}.court-card .court-head{padding:12px 15px}}
 
+
+@media(max-width:650px){
+ #playersSection table{display:block;overflow:visible;white-space:normal}
+ #playersSection table thead{display:none}
+ #playersSection table tbody{display:grid;gap:9px}
+ #playersSection table tbody tr{display:grid;grid-template-columns:minmax(0,1fr) 92px;gap:5px 10px;align-items:center;background:#FFFFFF;border:1px solid #E7EDE5;border-radius:14px;padding:12px}
+ #playersSection table tbody td{border:0;padding:2px;min-width:0}
+ #playersSection table tbody td:nth-child(1){grid-column:1;grid-row:1;font-weight:800;color:#123D32;font-size:17px}
+ #playersSection table tbody td:nth-child(2){grid-column:1;grid-row:2;color:#698078;font-size:12px}
+ #playersSection table tbody td:nth-child(3){grid-column:1;grid-row:3;font-size:12px}
+ #playersSection table tbody td:nth-child(4){grid-column:2;grid-row:1 / span 2;text-align:right;color:#123D32;font-size:17px;font-weight:800}
+ #playersSection table tbody td:nth-child(5){grid-column:2;grid-row:3;text-align:right;font-size:11px;color:#698078}
+ #playersSection table tbody td:nth-child(n+6):nth-child(-n+8){display:none}
+ #playersSection table tbody td:nth-child(9){grid-column:1 / -1;grid-row:4}
+ #playersSection table tbody td:nth-child(9) input{width:100%;margin:0}
+ #playersSection table tbody td select{margin:0;max-width:100%;font-size:12px}
+ .status-badge{font-size:11px}
+}
 </style>
 
 </head>
@@ -906,10 +924,8 @@ function addPlayer(){
  状態変更
 ***********************************/
 
-function changePlayerStatus(
-    index,
-    status
-){
+function changePlayerStatus(index,status){
+    if(role!=="admin")return;
 
     players[index].status =
         status;
@@ -924,10 +940,8 @@ function changePlayerStatus(
  ひとこと変更
 ***********************************/
 
-function updateComment(
-    index,
-    value
-){
+function updateComment(index,value){
+    if(role!=="admin")return;
 
     players[index].comment =
         value;
@@ -1006,6 +1020,7 @@ function renderPlayers(){
             <td>
 
                 <select
+                 ${role==="admin"?"":"disabled"}
                  onchange="
                  changePlayerStatus(
                    ${index},
@@ -1084,6 +1099,7 @@ function renderPlayers(){
                 <input
 
                  class="comment-input"
+                 ${role==="admin"?"":"disabled"}
 
                  value="${
                     player.comment || ""
@@ -1309,17 +1325,13 @@ function pairPenalty(id1,id2){
         const hit =
 
         (
-            pair[0]===id1
-            &&
-            pair[1]===id2
+            (pair.p1 ?? pair[0])===id1 && (pair.p2 ?? pair[1])===id2
         )
 
         ||
 
         (
-            pair[0]===id2
-            &&
-            pair[1]===id1
+            (pair.p1 ?? pair[0])===id2 && (pair.p2 ?? pair[1])===id1
         );
 
         if(hit){
