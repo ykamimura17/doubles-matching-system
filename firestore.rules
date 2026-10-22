@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reads require Firebase Authentication (anonymous viewer or email/password admin).
+    // All changes to system/current are made through authenticated server endpoints,
+    // never directly by the client.
+    match /system/current {
+      allow get: if request.auth != null;
+      allow list, create, update, delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
