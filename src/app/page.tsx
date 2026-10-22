@@ -15,7 +15,20 @@ export default function Home(){
  useEffect(()=>{if(e2eMode){setState(createScenarioState());setAdmin(true);return;}try{const {auth,db}=getFirebase();const stopAuth=onAuthStateChanged(auth,async u=>{
   if(!u){setUser(null);setAdmin(false);try{await signInAnonymously(auth)}catch(e){setError(e instanceof Error?e.message:"参加者認証に失敗しました")}return}
   setUser(u);try{setAdmin(!u.isAnonymous&&Boolean((await u.getIdTokenResult(true)).claims.admin))}catch(e){setAdmin(false);setError(e instanceof Error?e.message:"権限の確認に失敗しました")}
- });const stopData=onSnapshot(doc(db,"system","current"),snapshot=>{if(snapshot.exists())setState({...emptyState,...snapshot.data()} as State)},e=>setError(e.message));return()=>{stopAuth();stopData()}}catch(e){setError(e instanceof Error?e.message:"Firebase設定を確認してください")}},[]);
+ });return stopAuth}catch(e){setError(e instanceof Error?e.message:"Firebase設定を確認してください")}},[]);
+ // Permission-denied listeners do not recover after anonymous sign-in.
+ // Start only after auth resolves, and replace the listener when the user changes.
+ useEffect(()=>{
+  if(e2eMode)return;
+  if(!user){setState(emptyState);return;}
+  try{
+   const {db}=getFirebase();
+   setError("");
+   return onSnapshot(doc(db,"system","current"),snapshot=>{
+    setState(snapshot.exists()?{...emptyState,...snapshot.data()} as State:emptyState);
+   },e=>setError(e.message));
+  }catch(e){setError(e instanceof Error?e.message:"Firebase設定を確認してください")}
+ },[user]);
  const active=useMemo(()=>state.courts.filter(c=>c.status==="playing"),[state.courts]);
  const waiting=useMemo(()=>state.players.filter(p=>p.status==="waiting"),[state.players]);
  const ranked=useMemo(()=>[...state.players].sort((a,b)=>b.point-a.point),[state.players]);
