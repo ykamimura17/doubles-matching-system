@@ -4,6 +4,9 @@ out/
 .env*
 !.env.example
 *.tsbuildinfo
+.vercel/
+*firebase-adminsdk*.json
+*service-account*.json
 
 playwright-report/
 test-results/
