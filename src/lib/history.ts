@@ -1,8 +1,8 @@
-import type {State,Player,Match} from "./types";
+import type {State,Player} from "./types";
 export function updateHistory(state:State,matchId:number,operation:"edit"|"delete",scoreA?:number,scoreB?:number):State{
  const match=state.matchHistory.find(m=>m.id===matchId);
  if(!match)throw Error("試合履歴が見つかりません");
- if(operation==="edit"&&(!Number.isInteger(scoreA)||!Number.isInteger(scoreB)||scoreA!<0||scoreB!<0||scoreA!+scoreB!!==4))throw Error("ゲーム数の合計は4にしてください");
+ if(operation==="edit"&&(!Number.isInteger(scoreA)||!Number.isInteger(scoreB)||(scoreA??-1)<0||(scoreB??-1)<0||(scoreA??0)+(scoreB??0)!==4))throw Error("ゲーム数の合計は4にしてください");
  const members=[...match.teamA,...match.teamB];
  if(new Set(members).size!==4)throw Error("同名選手が含まれる履歴は自動編集できません");
  const lookup=members.map(name=>state.players.filter(p=>p.name===name));
