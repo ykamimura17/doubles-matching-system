@@ -8,10 +8,12 @@
 2. `npm install`
 3. `.env.example` を `.env.local` にコピーし、Firebaseの値を設定
 4. Firebase Authenticationでメール/パスワード認証を有効化し、管理者ユーザーにサーバー側から `admin: true` のカスタムクレームを付与
-5. Firestoreの `system/current` を用意し、データを既存形式から移行（既存のHTML版が使用する同じドキュメント）
+5. 既存HTMLと同じFirebase `loe26d` の `system/current` を使用（初期化しない）
 6. `npm run dev`、`npm run typecheck`、`npm test`
 
 ## アーキテクチャ
+
+公開先は **Vercel Hobby + Firebase Spark**。[接続手順](docs/vercel-firebase-spark.md) に環境変数と管理者設定を記載。
 
 - `src/app/page.tsx`: レスポンシブUI・Firestore購読
 - `src/components/CourtCard.tsx`: Figma風のコートカード
