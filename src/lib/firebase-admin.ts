@@ -11,7 +11,7 @@ import {getFirestore} from "firebase-admin/firestore";
  */
 function app(){
  const projectId=process.env.FIREBASE_PROJECT_ID;
- if(projectId!=="tennis-club-system")throw new Error("FIREBASE_PROJECT_ID must be tennis-club-system");
+ if(projectId!=="loe26d")throw new Error("FIREBASE_PROJECT_ID must be loe26d");
  const existing=getApps()[0];
  if(existing){
   if(existing.options.projectId!==projectId)throw new Error("Firebase Admin project ID mismatch");

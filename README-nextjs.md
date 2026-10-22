@@ -8,7 +8,7 @@
 2. `npm install`
 3. `.env.example` を `.env.local` にコピーし、Firebaseの値を設定
 4. Firebase Authenticationでメール/パスワード認証を有効化し、管理者ユーザーにサーバー側から `admin: true` のカスタムクレームを付与
-5. 新Firebase `tennis-club-system` に `system/current` を用意（旧環境は使用しない）
+5. 既存HTMLと同じFirebase `loe26d` の `system/current` を使用（初期化しない）
 6. `npm run dev`、`npm run typecheck`、`npm test`
 
 ## アーキテクチャ

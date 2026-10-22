@@ -1,12 +1,12 @@
 import {pathToFileURL} from "node:url";
 import {readServiceAccount} from "../src/lib/firebase-service-account.mjs";
-const expected = "tennis-club-system";
+const expected = "loe26d";
 export function checkConfig(env) {
   for (const key of ["FIREBASE_PROJECT_ID", "NEXT_PUBLIC_FIREBASE_PROJECT_ID"]) {
     if (env[key] !== expected) throw Error(`${key} must be ${expected}`);
   }
   if (env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN !== `${expected}.firebaseapp.com`) {
-    throw Error("Firebase auth domain must belong to tennis-club-system");
+    throw Error("Firebase auth domain must belong to loe26d");
   }
   for (const key of ["NEXT_PUBLIC_FIREBASE_API_KEY", "NEXT_PUBLIC_FIREBASE_APP_ID"]) {
     if (!env[key] || /placeholder|replace|\.\.\./i.test(env[key])) throw Error(`${key} must be set from the Firebase Web app settings`);
@@ -18,5 +18,5 @@ export function checkConfig(env) {
 }
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   checkConfig(process.env);
-  console.log("Firebase configuration targets tennis-club-system (no network checks performed).");
+  console.log("Firebase configuration targets loe26d (no network checks performed).");
 }
