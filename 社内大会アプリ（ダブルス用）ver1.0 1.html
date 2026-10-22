@@ -337,11 +337,80 @@ th{
 
 }
 
+
+/* COURTSIDE responsive refresh */
+:root{--primary:#123D32;--primary-hover:#205747;--bg:#F5F7F2;--card:#FFFFFF;--lime:#C5F26D;--muted:#698078;--ink:#182A25}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:Inter,"Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--ink);max-width:1480px;margin:0 auto;padding:26px 24px 100px}
+body>h1{color:var(--primary);font-size:clamp(22px,2.6vw,34px);letter-spacing:-.03em;margin:10px 0 24px}
+h1,h2,h3{color:var(--primary)}
+h2{font-size:clamp(19px,2vw,27px);margin:0 0 19px}
+.card{border:1px solid #E7EDE5;border-radius:20px;box-shadow:0 9px 28px #123D320b;padding:24px;margin-bottom:20px;scroll-margin-top:95px}
+button{background:var(--primary);color:var(--lime);border-radius:12px;padding:12px 18px}
+button:hover{background:var(--primary-hover)}
+button:disabled{opacity:.45;cursor:not-allowed}
+input,select{border:1px solid #D8E4D5;background:#fff;color:var(--ink);min-height:43px;max-width:100%}
+th{background:var(--primary);color:white}
+th,td{border-color:#E4ECE3;padding:11px 9px}
+td{overflow-wrap:anywhere}
+.status-waiting{background:#E7F3DC;color:#123D32}
+.status-playing{background:#DFF6B3;color:#123D32}
+.status-rest{background:#EAEEEB;color:#698078}
+.rank-card{background:white;border:1px solid #E7EDE5;border-left:5px solid var(--lime);padding:17px;border-radius:13px;margin-bottom:9px;display:flex;align-items:center;gap:14px}
+.rank-card .rank-name{font-size:20px;font-weight:750;flex:1}
+.rank-card .rank-meta{display:flex;flex-direction:column;align-items:end;gap:4px}
+.rank-card small,.player-record{font-size:11px;color:var(--muted)}
+#rankingArea:not(.hidden){display:block}
+#courtArea{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.court-card{border:0;padding:0;margin:0;overflow:hidden;background:#fff;border-radius:19px;box-shadow:0 10px 24px #123D3214}
+.court-card .court-head{background:#123D32;color:#fff;display:flex;justify-content:space-between;align-items:center;padding:17px 18px;font-size:17px;font-weight:800}
+.court-head .court-status{background:#C5F26D;color:#123D32;border-radius:30px;font-size:12px;font-weight:800;padding:7px 12px}
+.court-head .court-status.empty{background:#EDF2EA}
+.court-surface{height:220px;position:relative;overflow:hidden;background:linear-gradient(150deg,#22492D,#628A46 44%,#375C36);isolation:isolate}
+.court-surface::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 14% 18%,#dae3b82b,transparent 45%),radial-gradient(ellipse at 90% 82%,#142b1e44,transparent 50%);pointer-events:none}
+.court-lines{position:absolute;inset:7% 12%;border:2px solid #F8F8E8;pointer-events:none}
+.court-lines::before{content:"";position:absolute;inset:0 8%;border-left:2px solid #F8F8E8;border-right:2px solid #F8F8E8}
+.service-lines{position:absolute;left:20%;right:20%;top:31%;bottom:31%;border-top:2px solid #F8F8E8;border-bottom:2px solid #F8F8E8}
+.service-lines::after{content:"";position:absolute;left:50%;top:0;height:100%;border-left:2px solid #F8F8E8}
+.net-line{position:absolute;left:8%;right:8%;top:50%;height:12px;transform:translateY(-50%);background:repeating-linear-gradient(90deg,#eff1e7aa 0 1px,transparent 1px 5px),repeating-linear-gradient(0deg,#eff1e7aa 0 1px,#27463088 1px 5px);border-top:3px solid #fff;box-shadow:0 8px 7px #0005}
+.team-overlay{position:absolute;left:50%;transform:translateX(-50%);z-index:3;text-align:center;color:#fff;background:#0D3027e8;padding:9px 15px;border:1px solid #ffffff33;border-radius:13px;white-space:nowrap;font-size:clamp(13px,1.35vw,18px);font-weight:800;text-shadow:0 1px 3px #0D302777;max-width:95%}
+.team-overlay.top{top:14%}.team-overlay.bottom{bottom:11%}
+.team-overlay.versus{top:50%;transform:translate(-50%,-50%);font-size:14px;padding:5px 13px;border-radius:50px}
+.court-bottom{background:#FAFBF7;padding:14px;text-align:center;color:var(--muted);font-size:12px}
+.court-action{display:block;width:100%;min-height:48px;margin:0;border-radius:0;background:#FAFBF7;color:#123D32;font-weight:700;font-size:13px}
+.court-action:hover{background:#E7F3DC;color:#123D32}
+.court-action.viewer{background:#FAFBF7;color:#698078;cursor:default}
+.court-empty{cursor:default}
+.court-menu{margin:12px 0 0;padding:18px;border:1px solid #DCE8DA;border-radius:18px;background:#F5F7F2}
+.court-menu h3{margin:0 0 12px}
+.court-menu button{min-height:48px}
+.court-menu .menu-actions{display:flex;gap:8px;flex-wrap:wrap}
+.court-menu .menu-actions button{flex:1;min-width:160px}
+.court-menu .menu-actions .secondary{background:#E7F3DC;color:#123D32}
+.court-menu label{display:block;margin:12px 0;font-weight:700;font-size:13px}
+.court-menu select{display:block;width:100%;margin:5px 0 0}
+.court-menu .teams{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.court-menu .teams h4{margin:9px 0}
+.court-menu .status-error{color:#A33325}
+.courts-summary{display:flex;gap:10px;margin-bottom:18px}
+.courts-summary .metric{background:white;border:1px solid #E7EDE5;border-radius:15px;padding:16px;min-width:110px;flex:1}
+.metric strong{display:block;color:#123D32;font-size:25px;margin-top:5px}
+#courtArea + #courtInteraction{margin-top:16px}
+#rankingArea .rank-card .rank-points{font-size:17px;font-weight:800;color:#123D32}
+#playerTable td .player-record{display:block;margin-top:4px}
+#appNav{display:flex;position:sticky;top:0;z-index:15;background:#123D32;border-radius:15px;padding:8px;gap:8px;margin-bottom:20px;box-shadow:0 10px 25px #123D3220}
+#appNav a{flex:1;text-decoration:none;color:#e5f4df;text-align:center;padding:11px 7px;border-radius:10px;font-size:13px;font-weight:700}
+#appNav a:hover,#appNav a:focus{background:#C5F26D;color:#123D32}
+@media(max-width:1000px){#courtArea{grid-template-columns:repeat(2,minmax(0,1fr))}.court-surface{height:210px}}
+@media(max-width:650px){body{padding:14px 13px 92px}body>h1{font-size:22px}.card{padding:16px;border-radius:17px}#courtArea{grid-template-columns:1fr}.court-surface{height:190px}.team-overlay{font-size:17px}#appNav{position:fixed;top:auto;bottom:0;left:0;right:0;margin:0;border-radius:16px 16px 0 0;padding:7px 5px;padding-bottom:max(8px,env(safe-area-inset-bottom))}#appNav a{font-size:11px;padding:12px 3px}.courts-summary .metric{min-width:0;padding:12px}.metric strong{font-size:23px}table{display:block;overflow-x:auto;white-space:nowrap}#playerTable td .player-record{font-size:10px}.court-menu .teams{grid-template-columns:1fr}#courtArea{gap:12px}.court-card .court-head{padding:12px 15px}}
+
 </style>
 
 </head>
 
 <body>
+<nav id="appNav" aria-label="ページ移動"><a href="#playersSection">選手</a><a href="#courtsSection">コート</a><a href="#rankingsSection">順位</a><a href="#historySection">履歴</a></nav>
 
 <h1>
 🎾 League of Enecom（エネコム社内大会）🏆
@@ -390,7 +459,7 @@ th{
 
 <!-- プレイヤー -->
 
-<div class="card">
+<div class="card" id="playersSection">
 
 <h2>
 👥 プレイヤー一覧
@@ -462,17 +531,11 @@ Pt
  id="matchingCard"
  class="card admin-only hidden">
 
-<h2>
-🎲 試合マッチング
-</h2>
+<h2>試合マッチング（空きコートから開始）</h2><p>管理者はコート状況で空きコートを選択してください。</p>
 
-<button onclick="runMatching()">
-自動マッチング
-</button>
 
-<button onclick="toggleManualMatch()">
-手動マッチング
-</button>
+
+
 
 <div
  id="manualMatchArea"
@@ -489,37 +552,35 @@ Pt
 
 <!-- コート -->
 
-<div class="card">
+<div class="card" id="courtsSection">
 
 <h2>
 🏟 コート状況
 </h2>
 
-<div id="courtArea">
+<div id="courtSummary" class="courts-summary"></div><div id="courtArea">
 
 </div>
+<div id="courtInteraction"></div>
 
 </div>
 
 <!-- ランキング -->
 
-<div class="card">
+<div class="card" id="rankingsSection">
 
 <h2>
 🏆 ランキング
 </h2>
 
-<button onclick="toggleRanking()">
-順位表示
-</button>
+<button onclick="refreshRanking()">ランキングを更新</button>
 
 <button onclick="toggleAwards()">
 MVP/SVP表示
 </button>
 
 <div
- id="rankingArea"
- class="hidden">
+ id="rankingArea">
 
 </div>
 
@@ -533,7 +594,7 @@ MVP/SVP表示
 
 <!-- 履歴 -->
 
-<div class="card">
+<div class="card" id="historySection">
 
 <h2>
 📋 試合履歴
@@ -999,7 +1060,7 @@ function renderPlayers(){
             </td>
 
             <td>
-            ${player.point}
+            ${player.point}<span class="player-record">${player.win}/${player.lose}/${player.draw}</span>
             </td>
 
             <td>
@@ -1055,162 +1116,106 @@ function renderPlayers(){
  常に設定面数を表示
 ***********************************/
 
+
+let selectedCourtId = null;
+function escapeCourtText(value){
+  return String(value ?? "").replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch]));
+}
+function courtIllustration(playing,teamA=[],teamB=[]){
+  const format = team=>team.map(p=>escapeCourtText(p.name)).join("・");
+  return '<div class="court-surface" aria-hidden="true"><div class="court-lines"></div><div class="service-lines"></div><div class="net-line"></div>'
+    + (playing?'<span class="team-overlay top">'+format(teamA)+'</span><span class="team-overlay versus">VS</span><span class="team-overlay bottom">'+format(teamB)+'</span>':'')
+    + '</div>';
+}
 function renderCourts(){
-
-    const area =
-        document.getElementById(
-            "courtArea"
-        );
-
-    if(!area){
-        return;
-    }
-
-    let html = "";
-
-    for(
-        let courtId = 1;
-        courtId <= courtCount;
-        courtId++
-    ){
-
-        const court =
-
-            courts.find(
-                c =>
-                c.id===courtId &&
-                c.status==="playing"
-            );
-
-        if(!court){
-
-            html += `
-
-            <div
-             class="
-             court-card
-             court-empty
-             ">
-
-                <h3>
-
-                コート${courtId}
-
-                🟢空き
-
-                </h3>
-
-            </div>
-
-            `;
-
-            continue;
-        }
-
-        html += `
-
-        <div
-         class="
-         court-card
-         court-playing
-         ">
-
-            <h3>
-
-            コート${courtId}
-
-            🔴試合中
-
-            </h3>
-
-            <b>
-
-            ${court.teamA[0].name}
-
-            &
-
-            ${court.teamA[1].name}
-
-            </b>
-
-            <br>
-
-            VS
-
-            <br>
-
-            <b>
-
-            ${court.teamB[0].name}
-
-            &
-
-            ${court.teamB[1].name}
-
-            </b>
-
-        </div>
-
-        `;
-
-	if(role==="admin"){
-
-            html += `
-
-            <hr>
-
-            Aチーム
-
-            <input
-             type="number"
-             min="0"
-             max="4"
-             value="0"
-             id="scoreA-${court.id}">
-
-            <br><br>
-
-            Bチーム
-
-            <input
-             type="number"
-             min="0"
-             max="4"
-             value="0"
-             id="scoreB-${court.id}">
-
-            <br><br>
-
-            <button
-             onclick="
-             registerMatchResult(
-             ${court.id}
-             )
-             ">
-
-             結果登録
-
-            </button>
-
-            <button
-             onclick="
-             cancelMatch(
-             ${court.id}
-             )
-             ">
-
-             試合取消
-
-            </button>
-
-            `;
-
-        }
-
-    }
-
-    area.innerHTML = html;
-
+  const area=document.getElementById("courtArea");
+  if(!area)return;
+  const active=courts.filter(c=>c.status==="playing");
+  const summary=document.getElementById("courtSummary");
+  if(summary)summary.innerHTML=[
+    ["全コート",courtCount],["試合中",active.length],["空き",Math.max(0,courtCount-active.length)]
+  ].map(([label,val])=>'<div class="metric">'+label+'<strong>'+String(val).padStart(2,"0")+'</strong></div>').join("");
+  area.innerHTML=Array.from({length:courtCount},(_,index)=>{
+    const id=index+1;
+    const court=active.find(c=>c.id===id),busy=!!court;
+    const title=busy?"タップして結果を入力":"タップしてマッチングを選択";
+    const button=role==="admin"
+      ?'<button class="court-action" onclick="openCourtAction('+id+')">'+title+'</button>'
+      :'<div class="court-bottom">'+(busy?"試合中":"空きコート")+'</div>';
+    return '<article class="court-card '+(busy?"court-playing":"court-empty")+'"><div class="court-head"><span>COURT '+String(id).padStart(2,"0")+'</span><span class="court-status '+(busy?"":"empty")+'">'+(busy?"● 試合中":"○ 空き")+'</span></div>'
+      +courtIllustration(busy,court?.teamA,court?.teamB)+button+'</article>';
+  }).join("");
+  const panel=document.getElementById("courtInteraction");
+  if(panel&&selectedCourtId!==null){
+    const activeCourt=active.some(c=>c.id===selectedCourtId);
+    if(selectedCourtId>courtCount){selectedCourtId=null;panel.innerHTML=""}
+    else if(activeCourt){showScorePanel(selectedCourtId)}
+    else if(!panel.querySelector(".court-menu")){showCourtMenu(selectedCourtId)}
+  }
+}
+function openCourtAction(id){
+  if(role!=="admin")return;
+  selectedCourtId=id;
+  const playing=courts.some(c=>c.id===id&&c.status==="playing");
+  if(playing)showScorePanel(id);else showCourtMenu(id);
+  document.getElementById("courtInteraction")?.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function closeCourtAction(){selectedCourtId=null;document.getElementById("courtInteraction").innerHTML=""}
+function showCourtMenu(id){
+  const panel=document.getElementById("courtInteraction");
+  panel.innerHTML='<section class="court-menu"><h3>COURT '+String(id).padStart(2,"0")+' / 空き</h3><p>次の試合のマッチング方法を選択してください。</p><div class="menu-actions"><button onclick="startSelectedAutomatic()">✦ 自動マッチング</button><button class="secondary" onclick="showSelectedManual()">手動入力</button><button class="secondary" onclick="closeCourtAction()">キャンセル</button></div></section>';
+}
+function showScorePanel(id){
+ const panel=document.getElementById("courtInteraction");
+ panel.innerHTML='<section class="court-menu"><h3>COURT '+String(id).padStart(2,"0")+' / 結果登録</h3><label>チームAのゲーム数<input type="number" min="0" max="4" value="0" id="scoreA-'+id+'"></label><label>チームBのゲーム数<input type="number" min="0" max="4" value="0" id="scoreB-'+id+'"></label><div class="menu-actions"><button onclick="finishSelectedMatch('+id+')">結果を登録</button><button class="secondary" onclick="cancelMatch('+id+');closeCourtAction()">試合取消</button><button class="secondary" onclick="closeCourtAction()">キャンセル</button></div></section>';
+}
+function finishSelectedMatch(id){
+ const a=Number(document.getElementById('scoreA-'+id)?.value),b=Number(document.getElementById('scoreB-'+id)?.value);
+ if(!Number.isInteger(a)||!Number.isInteger(b)||a<0||b<0||a>4||b>4||a+b!==4){alert("ゲーム数は合計4になるように入力してください");return}
+ registerMatchResult(id);closeCourtAction();renderCourts();renderPlayers();renderRanking();
+}
+function startSelectedAutomatic(){
+ if(role!=="admin"||!Number.isInteger(selectedCourtId))return;
+ const id=selectedCourtId;
+ if(courts.some(c=>c.id===id&&c.status==="playing")){alert("このコートは試合中です");return}
+ const candidates=players.filter(p=>p.status==="waiting").sort((a,b)=>(a.matchCount-b.matchCount)||(playerRating(b)-playerRating(a))).slice(0,4);
+ if(candidates.length<4){alert("待機中の選手が4名必要です");return}
+ const [teamA,teamB]=findBestPairing(candidates);
+ showSelectedPreview(id,teamA,teamB,"auto");
+}
+function showSelectedManual(){
+ if(role!=="admin"||selectedCourtId===null)return;
+ const waiting=players.filter(p=>p.status==="waiting");
+ if(waiting.length<4){alert("待機中の選手が4名必要です");return}
+ const options='<option value="">選手を選択</option>'+waiting.map(p=>'<option value="'+p.id+'">'+escapeCourtText(p.name)+'</option>').join("");
+ const panel=document.getElementById("courtInteraction");
+ panel.innerHTML='<section class="court-menu"><h3>COURT '+String(selectedCourtId).padStart(2,"0")+' / 手動入力</h3><div class="teams"><div><h4>TEAM A</h4><label>選手1<select id="selectedA1">'+options+'</select></label><label>選手2<select id="selectedA2">'+options+'</select></label></div><div><h4>TEAM B</h4><label>選手1<select id="selectedB1">'+options+'</select></label><label>選手2<select id="selectedB2">'+options+'</select></label></div></div><div class="menu-actions"><button onclick="previewSelectedManual()">組み合わせを確認</button><button class="secondary" onclick="showCourtMenu(selectedCourtId)">戻る</button></div></section>';
+}
+function previewSelectedManual(){
+ const ids=['selectedA1','selectedA2','selectedB1','selectedB2'].map(id=>Number(document.getElementById(id)?.value));
+ if(ids.some(id=>!id)||new Set(ids).size!==4){alert("重複しない選手4名を選択してください");return}
+ const selected=ids.map(id=>players.find(p=>p.id===id&&p.status==="waiting"));
+ if(selected.some(p=>!p)){alert("選択した選手は現在参加できません");return}
+ showSelectedPreview(selectedCourtId,selected.slice(0,2),selected.slice(2),"manual");
+}
+function showSelectedPreview(id,a,b,mode){
+ const people=[...a,...b];
+ const names=p=>p.map(x=>escapeCourtText(x.name)).join("・");
+ const panel=document.getElementById("courtInteraction");
+ panel.innerHTML='<section class="court-menu"><h3>COURT '+String(id).padStart(2,"0")+' / '+(mode==="auto"?"自動選出結果":"手動入力の確認")+'</h3><p><strong>'+names(a)+'</strong>　VS　<strong>'+names(b)+'</strong></p><p>この組み合わせで試合を開始しますか？</p><div class="menu-actions"><button id="confirmMatchBtn">この組み合わせで試合開始</button><button class="secondary" onclick="'+(mode==="auto"?"startSelectedAutomatic()":"showSelectedManual()")+'">変更する</button><button class="secondary" onclick="showCourtMenu('+id+')">戻る</button></div></section>';
+ document.getElementById("confirmMatchBtn").onclick=()=>confirmSelectedMatch(id,people);
+}
+function confirmSelectedMatch(id,people){
+ if(role!=="admin"||people.length!==4||new Set(people.map(p=>p.id)).size!==4)return;
+ if(courts.some(c=>c.id===id&&c.status==="playing")){alert("コートが使用中です");return}
+ const actual=people.map(p=>players.find(q=>q.id===p.id&&q.status==="waiting"));
+ if(actual.some(p=>!p)){alert("選手の状態が変わりました。再選択してください");showCourtMenu(id);return}
+ const existing=courts.find(c=>c.id===id);
+ if(existing){existing.status="playing";existing.teamA=actual.slice(0,2);existing.teamB=actual.slice(2)}
+ else courts.push({id,status:"playing",teamA:actual.slice(0,2),teamB:actual.slice(2)});
+ actual.forEach(p=>p.status="playing");
+ for(const pair of [[actual[0],actual[1]],[actual[2],actual[3]]])pairHistory.push({p1:pair[0].id,p2:pair[1].id});
+ closeCourtAction();renderPlayers();renderCourts();saveData();
 }
 
 /***********************************
@@ -1219,6 +1224,7 @@ function renderCourts(){
 
 renderPlayers();
 renderCourts();
+renderRanking();
 
 /***********************************
  Part3
@@ -2053,72 +2059,14 @@ function applyResult(
  ランキング
 ***********************************/
 
-function toggleRanking(){
 
-    document
-    .getElementById(
-        "rankingArea"
-    )
-    .classList
-    .toggle(
-        "hidden"
-    );
-
-    renderRanking();
-
-}
-
+function toggleRanking(){refreshRanking()}
+function refreshRanking(){renderRanking()}
 function renderRanking(){
-
-    const area =
-        document
-        .getElementById(
-            "rankingArea"
-        );
-
-    if(
-        area.classList.contains(
-            "hidden"
-        )
-    ){
-        return;
-    }
-
-    const ranking =
-
-        [...players]
-
-        .sort(
-            (a,b)=>
-            b.point-a.point
-        );
-
-    let html = "";
-
-    ranking.forEach(
-        (player,index)=>{
-
-        html += `
-
-        <div class="rank-card">
-
-            ${index+1}位
-
-            ${player.name}
-
-            :
-
-            ${player.point}pt
-
-        </div>
-
-        `;
-
-    });
-
-    area.innerHTML =
-        html;
-
+ const area=document.getElementById("rankingArea");if(!area)return;
+ area.classList.remove("hidden");
+ const sorted=[...players].sort((a,b)=>(b.point-a.point)||(a.name||"").localeCompare(b.name||""));
+ area.innerHTML=sorted.map((p,i)=>'<div class="rank-card"><strong>'+String(i+1).padStart(2,"0")+'</strong><span class="rank-name">'+escapeCourtText(p.name)+'</span><span class="rank-meta"><span class="rank-points">'+p.point+' pt</span><small>'+p.win+'/'+p.lose+'/'+p.draw+'</small></span></div>').join("")+'<p style="font-size:12px;color:#698078">勝利 / 敗北 / 引き分け</p>';
 }
 
 /***********************************
