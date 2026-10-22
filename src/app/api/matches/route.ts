@@ -3,6 +3,7 @@ import {z} from "zod";
 import {adminDb,requireAdmin} from "@/lib/firebase-admin";
 import {applyMatchResult,assertStart,chooseMatch} from "@/lib/matching";
 import type {State} from "@/lib/types";
+export const runtime="nodejs";
 const bodySchema=z.discriminatedUnion("action",[
  z.object({action:z.literal("preview"),courtId:z.number().int().positive()}),
  z.object({action:z.literal("start"),courtId:z.number().int().positive(),playerIds:z.array(z.number().int()).length(4)}),

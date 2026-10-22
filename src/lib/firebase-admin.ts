@@ -1,22 +1,24 @@
 import "server-only";
-import {getApps,initializeApp,applicationDefault} from "firebase-admin/app";
+import {getApps,initializeApp,applicationDefault,cert} from "firebase-admin/app";
+import {readServiceAccount} from "./firebase-service-account.mjs";
 import {getAuth} from "firebase-admin/auth";
 import {getFirestore} from "firebase-admin/firestore";
 
 /**
- * Google managed hosting (Cloud Run / App Hosting): ADC from the runtime identity.
- * Local: gcloud auth application-default login
+ * Vercel: server-only service account environment variables.
+ * Local: ADC or the same service account environment variables.
  * Never expose server credentials via NEXT_PUBLIC_*.
  */
 function app(){
  const projectId=process.env.FIREBASE_PROJECT_ID;
- if(!projectId)throw new Error("FIREBASE_PROJECT_ID is required for Firebase Admin SDK");
+ if(projectId!=="tennis-club-system")throw new Error("FIREBASE_PROJECT_ID must be tennis-club-system");
  const existing=getApps()[0];
  if(existing){
   if(existing.options.projectId!==projectId)throw new Error("Firebase Admin project ID mismatch");
   return existing;
  }
- return initializeApp({credential:applicationDefault(),projectId});
+ const serviceAccount=readServiceAccount(process.env);
+ return initializeApp({credential:serviceAccount?cert(serviceAccount):applicationDefault(),projectId});
 }
 export function adminDb(){app();return getFirestore()}
 export async function requireAdmin(header:string|null){
