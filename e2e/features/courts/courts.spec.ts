@@ -1,7 +1,7 @@
 import {test,expect} from "@playwright/test";
 
 test.describe("コート・試合管理",()=>{
- test.beforeEach(async({page})=>{await page.goto("/");await expect(page.getByText("テスト環境")).toBeVisible()});
+ test.beforeEach(async({page})=>{await page.goto("/courts");await expect(page.getByText("テスト環境")).toBeVisible()});
  test("現在の試合と空きコートを表示する",async({page})=>{
   const cards=page.locator("#courts .court-card");
   await expect(cards).toHaveCount(3);
@@ -40,6 +40,7 @@ test.describe("コート・試合管理",()=>{
   await scoreInputs.nth(1).fill("0");
   await page.getByRole("button",{name:"結果を登録"}).click();
   await expect(card).toContainText("空き");
+  await page.goto("/history");
   await expect(page.locator("#history .history").first()).toContainText("4 - 0");
  });
 });
