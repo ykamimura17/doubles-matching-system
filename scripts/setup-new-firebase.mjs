@@ -3,8 +3,8 @@ import {getAuth} from "firebase-admin/auth";
 
 const [action,projectArgument,confirmation,uid]=process.argv.slice(2);
 const projectId=process.env.FIREBASE_PROJECT_ID;
-if(projectId!=="loe26d"||projectId!==projectArgument||confirmation!=="--confirm-existing-project"){
- console.error("Usage: FIREBASE_PROJECT_ID=loe26d node scripts/setup-new-firebase.mjs grant-admin loe26d --confirm-existing-project ADMIN_UID");
+if(projectId!=="tennis-club-system"||projectId!==projectArgument||confirmation!=="--confirm-existing-project"){
+ console.error("Usage: FIREBASE_PROJECT_ID=tennis-club-system node scripts/setup-new-firebase.mjs grant-admin tennis-club-system --confirm-existing-project ADMIN_UID");
  process.exit(1);
 }
 if(action!=="grant-admin")throw Error("Only grant-admin is allowed; existing Firestore data must not be initialized");
