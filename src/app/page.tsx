@@ -6,17 +6,25 @@ import {getFirebase} from "@/lib/firebase-client";
 import {CourtCard} from "@/components/CourtCard";
 import type {Player,State} from "@/lib/types";
 import {emptyState} from "@/lib/types";
+import {createScenarioState,performScenarioAction} from "@/lib/e2e/scenario";
+const e2eMode=process.env.NODE_ENV==="development" && process.env.NEXT_PUBLIC_E2E_MODE==="true";
 type Mode="menu"|"manual"|"preview"|"score";
 export default function Home(){
  const [state,setState]=useState<State>(emptyState),[error,setError]=useState(""),[user,setUser]=useState<User|null>(null),[admin,setAdmin]=useState(false),[email,setEmail]=useState(""),[password,setPassword]=useState("");
  const [selected,setSelected]=useState<number|null>(null),[mode,setMode]=useState<Mode>("menu"),[ids,setIds]=useState<number[]>([0,0,0,0]),[scores,setScores]=useState([0,4]),[loading,setLoading]=useState(false);
- useEffect(()=>{try{const {auth,db}=getFirebase();const stopAuth=onAuthStateChanged(auth,async u=>{setUser(u);setAdmin(u?Boolean((await u.getIdTokenResult()).claims.admin):false)});const stopData=onSnapshot(doc(db,"system","current"),snapshot=>{if(snapshot.exists())setState({...emptyState,...snapshot.data()} as State)},e=>setError(e.message));return()=>{stopAuth();stopData()}}catch(e){setError(e instanceof Error?e.message:"Firebase設定を確認してください")}},[]);
+ useEffect(()=>{if(e2eMode){setState(createScenarioState());setAdmin(true);return;}try{const {auth,db}=getFirebase();const stopAuth=onAuthStateChanged(auth,async u=>{setUser(u);setAdmin(u?Boolean((await u.getIdTokenResult()).claims.admin):false)});const stopData=onSnapshot(doc(db,"system","current"),snapshot=>{if(snapshot.exists())setState({...emptyState,...snapshot.data()} as State)},e=>setError(e.message));return()=>{stopAuth();stopData()}}catch(e){setError(e instanceof Error?e.message:"Firebase設定を確認してください")}},[]);
  const active=useMemo(()=>state.courts.filter(c=>c.status==="playing"),[state.courts]);
  const waiting=useMemo(()=>state.players.filter(p=>p.status==="waiting"),[state.players]);
  const ranked=useMemo(()=>[...state.players].sort((a,b)=>b.point-a.point),[state.players]);
  const selectedCourt=active.find(c=>c.id===selected);
  async function login(e:React.FormEvent){e.preventDefault();setError("");try{await signInWithEmailAndPassword(getFirebase().auth,email,password);setPassword("")}catch(e){setError(e instanceof Error?e.message:"ログインできません")}}
- async function request(body:Record<string,unknown>){if(!user)throw Error("管理者ログインが必要です");const token=await user.getIdToken();const response=await fetch("/api/matches",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.error||"操作に失敗しました");return data}
+ async function request(body:Record<string,unknown>){
+ if(e2eMode){
+  const result=performScenarioAction(state,body);
+  if(result.state)setState(result.state);
+  return result.response;
+ }
+ if(!user)throw Error("管理者ログインが必要です");const token=await user.getIdToken();const response=await fetch("/api/matches",{method:"POST",headers:{"content-type":"application/json",authorization:"Bearer "+token},body:JSON.stringify(body)});const data=await response.json();if(!response.ok)throw Error(data.error||"操作に失敗しました");return data}
  async function action(body:Record<string,unknown>){setLoading(true);setError("");try{return await request(body)}catch(e){setError(e instanceof Error?e.message:"操作に失敗しました");return null}finally{setLoading(false)}}
  function openCourt(id:number){setSelected(id);setMode(active.some(c=>c.id===id)?"score":"menu");setIds([0,0,0,0]);setScores([0,4])}
  async function automatic(){if(selected===null)return;const result=await action({action:"preview",courtId:selected});if(result){setIds([...result.teams.teamA,...result.teams.teamB].map((p:Player)=>p.id));setMode("preview")}}
@@ -25,7 +33,7 @@ export default function Home(){
  const names=(values:number[])=>values.map(id=>state.players.find(p=>p.id===id)?.name||"未選択").join("・");
  return <div className="shell"><header className="site-header"><div><small>TENNIS MANAGER</small><h1>テニス部のシステム</h1></div><span className="header-sub">ダブルス練習会</span></header>
  <nav className="nav"><a href="#courts">コート</a><a href="#players">選手</a><a href="#ranking">ランキング</a><a href="#history">履歴</a></nav>
- <section className="login"><span>{admin?"管理者でログイン中":user?"参加者としてログイン中":"閲覧モード"}</span>{user?<button onClick={()=>signOut(getFirebase().auth)}>ログアウト</button>:<form onSubmit={login}><input type="email" aria-label="管理者メール" placeholder="管理者メール" value={email} onChange={e=>setEmail(e.target.value)} required/><input type="password" aria-label="パスワード" placeholder="パスワード" value={password} onChange={e=>setPassword(e.target.value)} required/><button>管理者ログイン</button></form>}</section>
+ <section className="login"><span>{admin?"管理者でログイン中":user?"参加者としてログイン中":"閲覧モード"}</span>{e2eMode?<span>テスト環境</span>:user?<button onClick={()=>signOut(getFirebase().auth)}>ログアウト</button>:<form onSubmit={login}><input type="email" aria-label="管理者メール" placeholder="管理者メール" value={email} onChange={e=>setEmail(e.target.value)} required/><input type="password" aria-label="パスワード" placeholder="パスワード" value={password} onChange={e=>setPassword(e.target.value)} required/><button>管理者ログイン</button></form>}</section>
  {error&&<p role="alert" className="error">{error}</p>}
  <main><section id="courts" className="panel"><div className="section-heading"><div><small>COURT STATUS</small><h2>コート状況</h2></div></div><div className="stats"><div>全コート<strong>{String(state.courtCount).padStart(2,"0")}</strong></div><div>試合中<strong>{String(active.length).padStart(2,"0")}</strong></div><div>空き<strong>{String(Math.max(0,state.courtCount-active.length)).padStart(2,"0")}</strong></div></div><h3>コート一覧</h3><div className="court-grid">{Array.from({length:state.courtCount},(_,i)=><CourtCard key={i} id={i+1} court={active.find(c=>c.id===i+1)} admin={admin} onClick={()=>openCourt(i+1)}/>)}</div>
  {admin&&selected!==null&&<div className="action-panel"><div className="action-heading"><h3>COURT {String(selected).padStart(2,"0")} / {selectedCourt?"試合中":"空き"}</h3><button className="subtle" onClick={()=>setSelected(null)}>閉じる</button></div>
