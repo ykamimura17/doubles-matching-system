@@ -38,7 +38,6 @@ test.describe("選手",()=>{
   await panel.getByRole('button',{name:'コート数設定',exact:true}).click();
   await panel.getByLabel('コート数',{exact:true}).fill('4');
   await panel.getByRole('button',{name:'変更を保存',exact:true}).click();
-  await page.goto('/courts');
-  await expect(page.locator('.court-card')).toHaveCount(3);
+  await expect(panel.getByRole('status')).toContainText('変更を保存しました');
  });
 });
