@@ -43,7 +43,7 @@ export function performScenarioAction(state:State,input:Record<string,unknown>):
   const court=state.courts.find(c=>c.id===courtId&&c.status==="playing");
   if(!court?.teamA||!court.teamB)throw Error("試合が見つかりません");
   const ids=new Set([...court.teamA,...court.teamB].map(p=>p.id));
-  return {state:{...state,courts:state.courts.map(c=>c.id===courtId?{id,status:"empty" as const}:c),players:state.players.map(p=>ids.has(p.id)?{...p,status:"waiting" as const}:p)},response:{ok:true}};
+  return {state:{...state,courts:state.courts.map(c=>c.id===courtId?{id:c.id,status:"empty" as const}:c),players:state.players.map(p=>ids.has(p.id)?{...p,status:"waiting" as const}:p)},response:{ok:true}};
  }
  throw Error("対応していない操作です");
 }
