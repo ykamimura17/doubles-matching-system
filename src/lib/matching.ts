@@ -1,14 +1,20 @@
 import type {Player,State} from "./types";
 export type Teams = {teamA:Player[];teamB:Player[]};
 const rating=(p:Player)=>p.level*100+p.point*10;
-export function chooseMatch(state:State):Teams {
+export function chooseMatch(state:State, previousIds:number[]=[]):Teams {
  const waiting=state.players.filter(p=>p.status==="waiting").sort((a,b)=>a.matchCount-b.matchCount||rating(b)-rating(a)).slice(0,4);
  if(waiting.length!==4)throw Error("待機中の選手が4名必要です");
  const [a,b,c,d]=waiting;
  const patterns:Teams[]=[{teamA:[a,b],teamB:[c,d]},{teamA:[a,c],teamB:[b,d]},{teamA:[a,d],teamB:[b,c]}];
  const repeat=(x:Player,y:Player)=>state.pairHistory.slice(-10).filter(p=>(p.p1===x.id&&p.p2===y.id)||(p.p1===y.id&&p.p2===x.id)).length;
+ const matchupKey=(a:string[],b:string[])=>[a.slice().sort().join("\\u0000"),b.slice().sort().join("\\u0000")].sort().join("\\u0001");
+ const pastMatchups=new Set(state.matchHistory.map(h=>matchupKey(h.teamA,h.teamB)));
+ const sameMatchup=(teams:Teams)=>pastMatchups.has(matchupKey(teams.teamA.map(p=>p.name),teams.teamB.map(p=>p.name)));
+ const sameProposal=(teams:Teams)=>previousIds.length===4&&matchupKey(teams.teamA.map(p=>String(p.id)),teams.teamB.map(p=>String(p.id)))===matchupKey(previousIds.slice(0,2).map(String),previousIds.slice(2).map(String));
  const score=(teams:Teams)=>Math.abs(teams.teamA.reduce((s,p)=>s+rating(p),0)-teams.teamB.reduce((s,p)=>s+rating(p),0))+1000*(repeat(teams.teamA[0],teams.teamA[1])+repeat(teams.teamB[0],teams.teamB[1]));
- return patterns.sort((x,y)=>score(x)-score(y))[0];
+ const alternatives=patterns.filter(t=>!sameProposal(t));
+ const fresh=alternatives.filter(t=>!sameMatchup(t));
+ return (fresh.length?fresh:alternatives).sort((x,y)=>score(x)-score(y))[0];
 }
 export function assertStart(state:State,courtId:number,ids:number[]):Teams{
  if(!Number.isInteger(courtId)||courtId<1||courtId>state.courtCount)throw Error("無効なコートです");
