@@ -22,7 +22,7 @@ export function performScenarioAction(state:State,input:Record<string,unknown>):
  const action=input.action;
  const courtId=Number(input.courtId);
  if(action==="preview"){
-  const teams=chooseMatch(state);
+  const teams=chooseMatch(state,Array.isArray(input.previousIds)?input.previousIds as number[]:[]);
   assertStart(state,courtId,[...teams.teamA,...teams.teamB].map(p=>p.id));
   return {response:{teams}};
  }
