@@ -37,3 +37,8 @@
 
 /* Keep match preview and its actions readable on narrow screens. */
 @media(max-width:900px){.matching-preview-sheet .preview{display:flex;flex-direction:column;align-items:stretch;gap:10px;padding:18px 0}.matching-preview-sheet .preview strong{display:block;width:100%;text-align:center;white-space:normal;overflow-wrap:anywhere;font-size:14px;line-height:1.5;padding:13px 10px}.matching-preview-sheet .preview span{text-align:center;line-height:1.2}.matching-preview-sheet .action-row{display:flex;flex-direction:column;gap:10px}.matching-preview-sheet .action-row button{width:100%;min-height:48px;flex:none}}
+
+/* Center manual matching and match preview above the court page. */
+.matching-modal-backdrop{position:fixed;inset:0;background:rgba(10,28,22,.55);z-index:39}
+.action-panel.matching-modal{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:40;width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;margin:0;padding:24px;background:white;border-radius:20px;box-shadow:0 24px 70px #102d2440}
+@media(max-width:900px){.action-panel.matching-modal{top:50%;bottom:auto;left:50%;right:auto;transform:translate(-50%,-50%);width:calc(100vw - 32px);max-width:440px;max-height:calc(100dvh - 32px);padding:20px 18px;border-radius:20px}.matching-modal .manual-grid{grid-template-columns:1fr}.matching-modal .action-row{flex-direction:column}.matching-modal .action-row button{width:100%;min-height:48px;flex:none}}
