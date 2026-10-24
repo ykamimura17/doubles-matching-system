@@ -52,3 +52,9 @@
 .matching-modal .preview span{text-align:center}
 .matching-modal .action-row{display:flex;flex-direction:column;gap:10px}
 .matching-modal .action-row button{width:100%;min-height:48px;flex:none}
+
+.rules-description{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8}
+.rules-panel .section-heading{flex-wrap:wrap;gap:12px}
+.rules-panel form{display:flex;flex-direction:column;gap:10px}
+.rules-panel textarea{width:100%;min-height:180px;resize:vertical;font:inherit;line-height:1.7;padding:12px;border:1px solid #ccd8d1;border-radius:10px}
+.rules-panel small{line-height:1.6}
