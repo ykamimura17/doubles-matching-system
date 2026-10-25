@@ -5,7 +5,7 @@ import {applyMatchResult,assertStart,chooseMatch} from "@/lib/matching";
 import type {State} from "@/lib/types";
 export const runtime="nodejs";
 const bodySchema=z.discriminatedUnion("action",[
- z.object({action:z.literal("preview"),courtId:z.number().int().positive()}),
+ z.object({action:z.literal("preview"),courtId:z.number().int().positive(),previousIds:z.array(z.number().int()).length(4).optional()}),
  z.object({action:z.literal("start"),courtId:z.number().int().positive(),playerIds:z.array(z.number().int()).length(4)}),
  z.object({action:z.literal("result"),courtId:z.number().int().positive(),scoreA:z.number().int(),scoreB:z.number().int()}),
  z.object({action:z.literal("cancel"),courtId:z.number().int().positive()})
@@ -18,8 +18,9 @@ export async function POST(request:NextRequest){
   if(body.action==="preview"){
    const snap=await ref.get();const state=snap.data() as State|undefined;
    if(!state)throw new Error("システムデータがありません");
-   assertStart(state,body.courtId,chooseMatch(state).teamA.concat(chooseMatch(state).teamB).map(p=>p.id));
-   return NextResponse.json({teams:chooseMatch(state)});
+   const teams=chooseMatch(state,body.previousIds);
+   assertStart(state,body.courtId,[...teams.teamA,...teams.teamB].map(p=>p.id));
+   return NextResponse.json({teams});
   }
   const result=await adminDb().runTransaction(async tx=>{
    const snap=await tx.get(ref);const state=snap.data() as State|undefined;
