@@ -2,7 +2,7 @@ import {test,expect} from '@playwright/test';
 test('ホームのルールを編集・キャンセル・保存できる',async({page})=>{
  await page.goto('/');
  const panel=page.getByRole('region',{name:'大会ルール'});
- await expect(panel).toContainText('ルール説明はまだ登録されていません');
+ await expect(panel).toContainText('負け：−1点');
  await panel.getByRole('button',{name:'ルールを編集'}).click();
  await panel.getByLabel('ルール説明',{exact:true}).fill('破棄する文章');
  await panel.getByRole('button',{name:'キャンセル',exact:true}).click();

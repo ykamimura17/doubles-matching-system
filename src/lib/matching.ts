@@ -26,7 +26,7 @@ export function applyMatchResult(state:State,courtId:number,scoreA:number,scoreB
  const updated=state.players.map(p=>{
   if(![...teamA,...teamB].includes(p.id))return p;
   const onA=teamA.includes(p.id),own=onA?scoreA:scoreB,other=onA?scoreB:scoreA;
-  return {...p,status:"waiting" as const,matchCount:p.matchCount+1,win:p.win+Number(own>other),lose:p.lose+Number(own<other),draw:p.draw+Number(own===other),point:p.point+(own>other?3:own===other?1:0)};
+  return {...p,status:"waiting" as const,matchCount:p.matchCount+1,win:p.win+Number(own>other),lose:p.lose+Number(own<other),draw:p.draw+Number(own===other),point:p.point+(own>other?3:own===other?1:-1)};
  });
- return {...state,players:updated,courts:state.courts.map(c=>c.id===courtId?{id:c.id,status:"empty" as const}:c),matchHistory:[{id:Date.now(),date:new Date().toISOString(),courtId,teamA:court.teamA.map(p=>p.name),teamB:court.teamB.map(p=>p.name),scoreA,scoreB},...state.matchHistory]};
+ return {...state,players:updated,courts:state.courts.map(c=>c.id===courtId?{id:c.id,status:"empty" as const}:c),matchHistory:[{id:Date.now(),date:new Date().toISOString(),courtId,lossPoint:-1,teamAIds:teamA,teamBIds:teamB,teamA:court.teamA.map(p=>p.name),teamB:court.teamB.map(p=>p.name),scoreA,scoreB},...state.matchHistory]};
 }
