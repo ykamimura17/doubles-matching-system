@@ -6,7 +6,7 @@ export function chooseMatch(state:State):Teams {
  if(waiting.length!==4)throw Error("待機中の選手が4名必要です");
  const [a,b,c,d]=waiting;
  const patterns:Teams[]=[{teamA:[a,b],teamB:[c,d]},{teamA:[a,c],teamB:[b,d]},{teamA:[a,d],teamB:[b,c]}];
- const repeat=(x:Player,y:Player)=>state.pairHistory.slice(-10).filter(p=>(p.p1===x.id&&p.p2===y.id)||(p.p1===y.id&&p.p2===x.id)).length;
+ const repeat=(x:Player,y:Player)=>state.pairHistory.filter(p=>(p.p1===x.id&&p.p2===y.id)||(p.p1===y.id&&p.p2===x.id)).length;
  const score=(teams:Teams)=>Math.abs(teams.teamA.reduce((s,p)=>s+rating(p),0)-teams.teamB.reduce((s,p)=>s+rating(p),0))+1000*(repeat(teams.teamA[0],teams.teamA[1])+repeat(teams.teamB[0],teams.teamB[1]));
  return patterns.sort((x,y)=>score(x)-score(y))[0];
 }
