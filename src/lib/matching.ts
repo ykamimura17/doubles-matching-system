@@ -6,7 +6,7 @@ export function chooseMatch(state:State):Teams {
  if(waiting.length!==4)throw Error("待機中の選手が4名必要です");
  const [a,b,c,d]=waiting;
  const patterns:Teams[]=[{teamA:[a,b],teamB:[c,d]},{teamA:[a,c],teamB:[b,d]},{teamA:[a,d],teamB:[b,c]}];
- const repeat=(x:Player,y:Player)=>state.pairHistory.slice(-10).filter(p=>(p.p1===x.id&&p.p2===y.id)||(p.p1===y.id&&p.p2===x.id)).length;
+ const repeat=(x:Player,y:Player)=>state.pairHistory.filter(p=>(p.p1===x.id&&p.p2===y.id)||(p.p1===y.id&&p.p2===x.id)).length;
  const score=(teams:Teams)=>Math.abs(teams.teamA.reduce((s,p)=>s+rating(p),0)-teams.teamB.reduce((s,p)=>s+rating(p),0))+1000*(repeat(teams.teamA[0],teams.teamA[1])+repeat(teams.teamB[0],teams.teamB[1]));
  return patterns.sort((x,y)=>score(x)-score(y))[0];
 }
@@ -26,7 +26,7 @@ export function applyMatchResult(state:State,courtId:number,scoreA:number,scoreB
  const updated=state.players.map(p=>{
   if(![...teamA,...teamB].includes(p.id))return p;
   const onA=teamA.includes(p.id),own=onA?scoreA:scoreB,other=onA?scoreB:scoreA;
-  return {...p,status:"waiting" as const,matchCount:p.matchCount+1,win:p.win+Number(own>other),lose:p.lose+Number(own<other),draw:p.draw+Number(own===other),point:p.point+(own>other?3:own===other?1:0)};
+  return {...p,status:"waiting" as const,matchCount:p.matchCount+1,win:p.win+Number(own>other),lose:p.lose+Number(own<other),draw:p.draw+Number(own===other),point:p.point+(own>other?3:own===other?1:-1)};
  });
- return {...state,players:updated,courts:state.courts.map(c=>c.id===courtId?{id:c.id,status:"empty" as const}:c),matchHistory:[{id:Date.now(),date:new Date().toISOString(),courtId,teamA:court.teamA.map(p=>p.name),teamB:court.teamB.map(p=>p.name),scoreA,scoreB},...state.matchHistory]};
+ return {...state,players:updated,courts:state.courts.map(c=>c.id===courtId?{id:c.id,status:"empty" as const}:c),matchHistory:[{id:Date.now(),date:new Date().toISOString(),courtId,lossPoint:-1,teamAIds:teamA,teamBIds:teamB,teamA:court.teamA.map(p=>p.name),teamB:court.teamB.map(p=>p.name),scoreA,scoreB},...state.matchHistory]};
 }
