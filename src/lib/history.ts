@@ -23,3 +23,9 @@ export function updateHistory(state:State,matchId:number,operation:"edit"|"delet
  const matchHistory=operation==="delete"?state.matchHistory.filter(m=>m.id!==matchId):state.matchHistory.map(m=>m.id===matchId?{...m,scoreA:scoreA!,scoreB:scoreB!}:m);
  return {...state,players,matchHistory};
 }
+
+/** 全試合履歴・ペア履歴・集計戦績を大会開始前の状態に戻す。 */
+export function resetMatchHistory(state:State):State{
+ if(state.courts.some(c=>c.status==="playing")||state.players.some(p=>p.status==="playing"))throw Error("試合中のコート・選手がいるためリセットできません");
+ return {...state,matchHistory:[],pairHistory:[],players:state.players.map(p=>({...p,point:0,matchCount:0,win:0,lose:0,draw:0}))};
+}
