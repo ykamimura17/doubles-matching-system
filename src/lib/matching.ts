@@ -2,23 +2,18 @@ import type {Player,State} from "./types";
 export type Teams = {teamA:Player[];teamB:Player[]};
 const rating=(p:Player)=>p.level*50+p.point*10;
 
-// 試合回数の少ない選手を優先し、同回数の候補からポイント上位・下位を選出する。
-function selectPlayers(players:Player[]):Player[] {
+// 試合回数を最優先。同回数の候補はワースト1→ワースト2→上位2位→1位の順に選ぶ。
+export function selectPlayers(players:Player[]):Player[] {
  const waiting=players.filter(p=>p.status==="waiting").sort((a,b)=>a.matchCount-b.matchCount);
  const selected:Player[]=[];
  for(let start=0;start<waiting.length&&selected.length<4;){
   let end=start+1;
   while(end<waiting.length&&waiting[end].matchCount===waiting[start].matchCount)end++;
-  const group=waiting.slice(start,end);
-  const slots=Math.min(4-selected.length,group.length);
-  if(slots===group.length){
-   selected.push(...group);
-  }else{
-   const ranked=[...group].sort((a,b)=>b.point-a.point);
-   const high=Math.ceil(slots/2), low=slots-high;
-   const chosen=new Set([...ranked.slice(0,high),...(low?ranked.slice(-low):[])]);
-   selected.push(...group.filter(p=>chosen.has(p)));
-  }
+  const group=waiting.slice(start,end).sort((a,b)=>a.point-b.point);
+  // 残り枠が少ない場合も低ポイント側から順にピックアップする。
+  const order=[group[0],group[1],group[group.length-2],group[group.length-1]]
+   .filter((p,index,ordered)=>p!==undefined&&ordered.indexOf(p)===index);
+  selected.push(...order.slice(0,4-selected.length));
   start=end;
  }
  return selected;
