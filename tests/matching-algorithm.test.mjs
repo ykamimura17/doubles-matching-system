@@ -20,9 +20,9 @@ test('A02: lowest match counts win selection', () => {
   const ps = players(8, {1:{matchCount:5},2:{matchCount:4},3:{matchCount:3},4:{matchCount:2},5:{matchCount:1},6:{matchCount:0},7:{matchCount:0},8:{matchCount:0}});
   assert.deepEqual(ids(chosen(ps)), [5,6,7,8]);
 });
-test('A03: rating breaks equal-match-count selection ties', () => {
-  const ps = players(6, {1:{level:1},2:{level:1},3:{level:2},4:{level:2},5:{level:3},6:{level:3}});
-  assert.deepEqual(ids(chosen(ps)), [3,4,5,6]);
+test('A03: equal-match-count ties choose top two and bottom two by points', () => {
+  const ps = players(6, {1:{point:6},2:{point:5},3:{point:4},4:{point:3},5:{point:2},6:{point:1}});
+  assert.deepEqual(ids(chosen(ps)), [1,2,5,6]);
 });
 test('A04: match count takes precedence over rating', () => {
   const ps = players(5, {1:{level:3,matchCount:1},2:{level:1},3:{level:1},4:{level:1},5:{level:1}});
@@ -33,7 +33,24 @@ test('A05: resting and playing players are excluded', () => {
   assert.deepEqual(ids(chosen(ps)), [3,4,5,6]);
 });
 test('A06: fewer than four waiting players throws', () => assert.throws(() => chosen(players(3)), /待機中の選手が4名必要/));
-test('A07: five waiting players are narrowed to four', () => assert.deepEqual(ids(chosen(players(5))), [1,2,3,4]));
+test('A07: five tied waiting players choose top two and bottom two (stable ties)', () => assert.deepEqual(ids(chosen(players(5))), [1,2,4,5]));
+test('A08: one remaining slot selects the highest-point player from tied match counts', () => {
+  const ps = players(6, {1:{matchCount:0},2:{matchCount:0},3:{matchCount:0},4:{matchCount:1,point:1},5:{matchCount:1,point:9},6:{matchCount:1,point:-2}});
+  assert.deepEqual(ids(chosen(ps)), [1,2,3,5]);
+});
+test('A09: points rather than level decide equal-match-count selection', () => {
+  const ps = players(5, {1:{level:3,point:3},2:{level:3,point:2},3:{level:3,point:1},4:{level:1,point:0},5:{level:1,point:-1}});
+  assert.deepEqual(ids(chosen(ps)), [1,2,4,5]);
+});
+test('A10: two remaining slots choose highest and lowest point players', () => {
+  const ps = players(6, {1:{matchCount:0},2:{matchCount:0},3:{matchCount:1,point:8},4:{matchCount:1,point:5},5:{matchCount:1,point:0},6:{matchCount:1,point:-2}});
+  assert.deepEqual(ids(chosen(ps)), [1,2,3,6]);
+});
+
+test('B06: level coefficient is 50 rather than 100', () => {
+  const ps = players(4, {1:{level:3,point:0},2:{level:2,point:10},3:{level:1,point:0},4:{level:2,point:0}});
+  assert.equal(teams(chosen(ps)), '1,4|2,3');
+});
 
 test('B01: equal ratings and no history use first generated pattern', () => assert.equal(teams(chosen(players(4))), '1,2|3,4'));
 test('B02: two advanced and two beginner players are balanced', () => {
@@ -79,7 +96,7 @@ test('D02: identical inputs produce identical results', () => {
   const s = state(players(6), [pair(1,2)]);
   assert.equal(teams(chooseMatch(s)), teams(chooseMatch(s)));
 });
-test('D03: original array order breaks exact selection ties', () => {
-  assert.deepEqual(ids(chosen(players(5))), [1,2,3,4]);
-  assert.deepEqual(ids(chosen(players(5).reverse())), [2,3,4,5]);
+test('D03: equal-point ties preserve candidate priority at the extremes', () => {
+  assert.deepEqual(ids(chosen(players(5))), [1,2,4,5]);
+  assert.deepEqual(ids(chosen(players(5).reverse())), [1,2,4,5]);
 });
