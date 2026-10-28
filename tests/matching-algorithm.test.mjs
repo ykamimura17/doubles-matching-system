@@ -5,7 +5,7 @@ import ts from 'typescript';
 
 const source = fs.readFileSync(new URL('../src/lib/matching.ts', import.meta.url), 'utf8');
 const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2022 } });
-const { chooseMatch } = await import('data:text/javascript;base64,' + Buffer.from(outputText).toString('base64'));
+const { chooseMatch, selectPlayers } = await import('data:text/javascript;base64,' + Buffer.from(outputText).toString('base64'));
 
 const player = (id, changes = {}) => ({ id, name: 'P' + id, level: 2, status: 'waiting', point: 0, matchCount: 0, win: 0, lose: 0, draw: 0, ...changes });
 const players = (n, changes = {}) => Array.from({ length: n }, (_, i) => player(i + 1, changes[i + 1]));
@@ -34,17 +34,37 @@ test('A05: resting and playing players are excluded', () => {
 });
 test('A06: fewer than four waiting players throws', () => assert.throws(() => chosen(players(3)), /待機中の選手が4名必要/));
 test('A07: five tied waiting players choose top two and bottom two (stable ties)', () => assert.deepEqual(ids(chosen(players(5))), [1,2,4,5]));
-test('A08: one remaining slot selects the highest-point player from tied match counts', () => {
+test('A08: one remaining slot selects the lowest-point player from tied match counts', () => {
   const ps = players(6, {1:{matchCount:0},2:{matchCount:0},3:{matchCount:0},4:{matchCount:1,point:1},5:{matchCount:1,point:9},6:{matchCount:1,point:-2}});
-  assert.deepEqual(ids(chosen(ps)), [1,2,3,5]);
+  assert.deepEqual(ids(chosen(ps)), [1,2,3,6]);
 });
 test('A09: points rather than level decide equal-match-count selection', () => {
   const ps = players(5, {1:{level:3,point:3},2:{level:3,point:2},3:{level:3,point:1},4:{level:1,point:0},5:{level:1,point:-1}});
   assert.deepEqual(ids(chosen(ps)), [1,2,4,5]);
 });
-test('A10: two remaining slots choose highest and lowest point players', () => {
+test('A10: two remaining slots select bottom two point players', () => {
   const ps = players(6, {1:{matchCount:0},2:{matchCount:0},3:{matchCount:1,point:8},4:{matchCount:1,point:5},5:{matchCount:1,point:0},6:{matchCount:1,point:-2}});
-  assert.deepEqual(ids(chosen(ps)), [1,2,3,6]);
+  assert.deepEqual(ids(chosen(ps)), [1,2,5,6]);
+});
+
+test('A11: points are picked worst, second worst, second best, best', () => {
+  const ps=players(6,{1:{point:60},2:{point:50},3:{point:40},4:{point:30},5:{point:20},6:{point:10}});
+  assert.deepEqual(selectPlayers(ps).map(p=>p.id),[6,5,2,1]);
+});
+test('A12: three remaining slots select bottom two followed by second best', () => {
+  const ps=players(7,{1:{matchCount:0},2:{matchCount:1,point:60},3:{matchCount:1,point:50},4:{matchCount:1,point:40},5:{matchCount:1,point:30},6:{matchCount:1,point:20},7:{matchCount:1,point:10}});
+  assert.deepEqual(selectPlayers(ps).map(p=>p.id),[1,7,6,3]);
+});
+test('A13: when exactly four players tie, the selection order is still low-low-high-high', () => {
+  const ps=players(4,{1:{point:40},2:{point:10},3:{point:30},4:{point:20}});
+  assert.deepEqual(selectPlayers(ps).map(p=>p.id),[2,4,3,1]);
+});
+test('A14: lower match counts override extreme points, preserving selection order by match count', () => {
+  const ps=players(6,{1:{matchCount:0,point:100},2:{matchCount:0,point:0},3:{matchCount:1,point:40},4:{matchCount:1,point:10},5:{matchCount:1,point:30},6:{matchCount:1,point:20}});
+  assert.deepEqual(selectPlayers(ps).map(p=>p.id),[2,1,4,6]);
+});
+test('A15: all tied points use stable input order at both extremes', () => {
+  assert.deepEqual(selectPlayers(players(5)).map(p=>p.id),[1,2,4,5]);
 });
 
 test('B06: level coefficient is 50 rather than 100', () => {
