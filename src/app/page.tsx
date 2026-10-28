@@ -31,7 +31,7 @@ export default function Home(){
  const [historySelection,setHistorySelection]=useState<number|null>(null),[historyAction,setHistoryAction]=useState<"edit"|"delete">("edit"),[historyScore,setHistoryScore]=useState([4,0]);
  const [resetConfirm,setResetConfirm]=useState(false);
  const [matchingSource,setMatchingSource]=useState<"auto"|"manual">("auto");
- const [selected,setSelected]=useState<number|null>(null),[mode,setMode]=useState<Mode>("menu"),[ids,setIds]=useState<number[]>([0,0,0,0]),[scores,setScores]=useState(["0","4"]),[loading,setLoading]=useState(false);
+ const [selected,setSelected]=useState<number|null>(null),[mode,setMode]=useState<Mode>("menu"),[ids,setIds]=useState<number[]>([0,0,0,0]),[scores,setScores]=useState(["0","0"]),[loading,setLoading]=useState(false);
  useEffect(()=>{if(e2eMode){setState(createScenarioState());setAdmin(true);return;}try{const {auth,db}=getFirebase();const stopAuth=onAuthStateChanged(auth,async u=>{
   if(!u){setUser(null);setAdmin(false);try{await signInAnonymously(auth)}catch(e){setError(e instanceof Error?e.message:"参加者認証に失敗しました")}return}
   setUser(u);try{setAdmin(!u.isAnonymous&&Boolean((await u.getIdTokenResult(true)).claims.admin))}catch(e){setAdmin(false);setError(e instanceof Error?e.message:"権限の確認に失敗しました")}
@@ -101,7 +101,7 @@ export default function Home(){
   }catch(e){setError(e instanceof Error?e.message:"リセットできませんでした")}
   finally{setLoading(false)}
  }
- function openCourt(id:number){setSelected(id);setMode(active.some(c=>c.id===id)?"score":"menu");setIds([0,0,0,0]);setScores(["0","4"])}
+ function openCourt(id:number){setSelected(id);setMode(active.some(c=>c.id===id)?"score":"menu");setIds([0,0,0,0]);setScores(["0","0"])}
  async function automatic(){if(selected===null)return;const result=await action({action:"preview",courtId:selected});if(result){setIds([...result.teams.teamA,...result.teams.teamB].map((p:Player)=>p.id));setMatchingSource("auto");setMode("preview")}}
  function manualPreview(){if(ids.some(id=>!id)||new Set(ids).size!==4){setError("待機中の選手4名を重複なく選択してください");return}setError("");setMatchingSource("manual");setMode("preview")}
  async function commit(body:Record<string,unknown>){if(await action(body)){setSelected(null);setMode("menu")}}
