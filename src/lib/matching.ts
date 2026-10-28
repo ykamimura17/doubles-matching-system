@@ -1,8 +1,30 @@
 import type {Player,State} from "./types";
 export type Teams = {teamA:Player[];teamB:Player[]};
-const rating=(p:Player)=>p.level*100+p.point*10;
+const rating=(p:Player)=>p.level*50+p.point*10;
+
+// 試合回数の少ない選手を優先し、同回数の候補からポイント上位・下位を選出する。
+function selectPlayers(players:Player[]):Player[] {
+ const waiting=players.filter(p=>p.status==="waiting").sort((a,b)=>a.matchCount-b.matchCount);
+ const selected:Player[]=[];
+ for(let start=0;start<waiting.length&&selected.length<4;){
+  let end=start+1;
+  while(end<waiting.length&&waiting[end].matchCount===waiting[start].matchCount)end++;
+  const group=waiting.slice(start,end);
+  const slots=Math.min(4-selected.length,group.length);
+  if(slots===group.length){
+   selected.push(...group);
+  }else{
+   const ranked=[...group].sort((a,b)=>b.point-a.point);
+   const high=Math.ceil(slots/2), low=slots-high;
+   const chosen=new Set([...ranked.slice(0,high),...(low?ranked.slice(-low):[])]);
+   selected.push(...group.filter(p=>chosen.has(p)));
+  }
+  start=end;
+ }
+ return selected;
+}
 export function chooseMatch(state:State):Teams {
- const waiting=state.players.filter(p=>p.status==="waiting").sort((a,b)=>a.matchCount-b.matchCount||rating(b)-rating(a)).slice(0,4);
+ const waiting=selectPlayers(state.players);
  if(waiting.length!==4)throw Error("待機中の選手が4名必要です");
  const [a,b,c,d]=waiting;
  const patterns:Teams[]=[{teamA:[a,b],teamB:[c,d]},{teamA:[a,c],teamB:[b,d]},{teamA:[a,d],teamB:[b,c]}];
