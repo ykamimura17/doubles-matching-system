@@ -1,7 +1,15 @@
 /** モバイルフッター向けの線画アイコン。SVGは現在のタブ色を継承します。 */
-export type FooterIconName = "court" | "player" | "ranking" | "history";
+export type FooterIconName = "home" | "court" | "player" | "ranking" | "history";
 
 export function FooterIcon({name}:{name:FooterIconName}){
+ if(name==="home"){
+  return <svg className="footer-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+   <path d="M3 10.5 12 4l9 6.5"/>
+   <path d="M5.5 9.5V20h13V9.5"/>
+   <path d="M9.5 20v-7h5v7"/>
+   <path d="M18.5 5.2V8.7"/>
+  </svg>;
+ }
  if(name==="court"){
   return <svg className="footer-nav-icon" viewBox="0 0 120 90" fill="none" stroke="currentColor" strokeWidth="3.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
    <rect x="8" y="8" width="104" height="74" rx="1"/>
