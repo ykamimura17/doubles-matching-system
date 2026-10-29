@@ -71,3 +71,7 @@ button.danger-button{background:#a42f25;color:white}
 button.danger-button:disabled{opacity:.45}
 .reset-confirm{margin-top:15px;padding:18px;background:#fff4f1;border:1px solid #edd0cb;border-radius:12px}
 @media(max-width:900px){.history-reset-panel{padding:18px}}
+
+/* The footer keeps its original active colors and a consistent icon footprint. */
+.mobile-bottom-nav .footer-nav-icon-slot{display:flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:21px;line-height:1}
+.mobile-bottom-nav .footer-nav-icon{display:block;width:25px;height:25px;flex:none}
