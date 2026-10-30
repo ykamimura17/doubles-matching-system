@@ -1,7 +1,8 @@
 import {test,expect} from "@playwright/test";
 
-test.describe("コート・試合管理",()=>{
- test.beforeEach(async({page})=>{await page.goto("/courts");await expect(page.getByText("テスト環境")).toBeVisible()});
+for(const role of ["admin","participant"]){
+test.describe(`コート・試合管理（${role}）`,()=>{
+ test.beforeEach(async({page})=>{await page.goto(`/courts?role=${role}`);await expect(page.getByText("テスト環境")).toBeVisible()});
  test("現在の試合と空きコートを表示する",async({page})=>{
   const cards=page.locator("#courts .court-card");
   await expect(cards).toHaveCount(3);
@@ -41,6 +42,17 @@ test.describe("コート・試合管理",()=>{
   await page.getByRole("button",{name:"結果を登録"}).click();
   await expect(card).toContainText("空き");
   await page.goto("/history");
-  await expect(page.locator("#history .history").first()).toContainText("4 - 0");
+  await expect(page.locator("#history .history").first().locator(".history-team-score")).toHaveText(["4","0"]);
+ });
+ test("参加者には取消や履歴の管理ボタンを表示しない",async({page})=>{
+  test.skip(role!=="participant");
+  await page.locator("#courts .court-card").first().getByRole("button",{name:/結果を入力/}).click();
+  await expect(page.getByRole("button",{name:"結果を登録",exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"試合取消",exact:true})).toHaveCount(0);
+  await page.goto("/history?role=participant");
+  await expect(page.getByText("テスト環境")).toBeVisible();
+  await expect(page.getByRole("button",{name:"編集",exact:true})).toHaveCount(0);
+  await expect(page.getByRole("button",{name:"削除",exact:true})).toHaveCount(0);
  });
 });
+}
