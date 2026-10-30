@@ -15,6 +15,9 @@ export function createScenarioState():State{
   player(3,"佐藤",3,"playing"),player(4,"安村",1,"playing"),
   player(5,"森田",0),player(6,"山下",0),player(7,"吉田",0),player(8,"中野",0)
  ];
+ // The recorded 4–0 result contributes one loss to each team B player.
+ players[2].lose=1;
+ players[3].lose=1;
  return {players,courts:[{id:1,status:"playing",teamA:[players[0],players[1]],teamB:[players[2],players[3]]}],matchHistory:[{id:100,date:"2026-10-22",courtId:3,teamA:["田中","山本"],teamB:["佐藤","安村"],scoreA:4,scoreB:0}],pairHistory:[],courtCount:3};
 }
 type ActionResult={state?:State;response:Record<string,unknown>};

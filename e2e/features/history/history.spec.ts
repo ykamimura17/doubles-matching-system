@@ -1,12 +1,54 @@
 import {test,expect} from "@playwright/test";
 test.describe("試合履歴",()=>{
- test("登録済みの対戦結果を閲覧できる",async({page})=>{
+ test("ペアごとの行に名前とスコアを表示する",async({page})=>{
   await page.goto("/history");
-  const history=page.locator("#history .history");
-  await expect(history).toHaveCount(1);
-  await expect(history.first()).toContainText("COURT 3");
-  await expect(history.first()).toContainText("田中・山本");
-  await expect(history.first()).toContainText("4 - 0");
-  await expect(history.first()).toContainText("佐藤・安村");
+  const history=page.locator("#history .history").first();
+  await expect(history).toContainText("COURT 03");
+  const teams=history.locator(".history-team-row");
+  await expect(teams).toHaveCount(2);
+  await expect(teams.nth(0)).toContainText("田中");
+  await expect(teams.nth(0)).toContainText("山本");
+  await expect(teams.nth(0).locator(".history-team-score")).toHaveText("4");
+  await expect(teams.nth(1)).toContainText("佐藤");
+  await expect(teams.nth(1)).toContainText("安村");
+  await expect(teams.nth(1).locator(".history-team-score")).toHaveText("0");
+ });
+ test("スクロールせずモーダルで編集・保存できる",async({page})=>{
+  await page.goto("/history");
+  const history=page.locator("#history .history").first();
+  const edit=history.getByRole("button",{name:"編集",exact:true});
+  await edit.scrollIntoViewIfNeeded();
+  const initialScroll=await page.evaluate(()=>window.scrollY);
+  await edit.click();
+  const dialog=page.getByRole("dialog",{name:"試合結果を修正",exact:true});
+  await expect(dialog).toBeVisible();
+  await expect(dialog).toContainText("田中");
+  await expect(dialog).toContainText("佐藤");
+  await dialog.getByRole("spinbutton",{name:"チームA スコア"}).fill("2");
+  await expect(dialog.getByRole("button",{name:"変更を保存する"})).toBeDisabled();
+  await dialog.getByRole("spinbutton",{name:"チームB スコア"}).fill("2");
+  await dialog.getByRole("button",{name:"変更を保存する"}).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(history.locator(".history-team-score")).toHaveText(["2","2"]);
+  expect(await page.evaluate(()=>window.scrollY)).toBe(initialScroll);
+  await expect(edit).toBeFocused();
+ });
+ test("キャンセル・Escape・削除確認をその場で操作できる",async({page})=>{
+  await page.goto("/history");
+  const history=page.locator("#history .history").first();
+  await history.getByRole("button",{name:"編集",exact:true}).click();
+  let dialog=page.getByRole("dialog");
+  await dialog.getByRole("spinbutton",{name:"チームA スコア"}).fill("1");
+  await dialog.getByRole("button",{name:"キャンセル"}).click();
+  await expect(dialog).not.toBeVisible();
+  await history.getByRole("button",{name:"編集",exact:true}).click();
+  await expect(page.getByRole("spinbutton",{name:"チームA スコア"})).toHaveValue("4");
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).not.toBeVisible();
+  await history.getByRole("button",{name:"削除",exact:true}).click();
+  dialog=page.getByRole("dialog");
+  await expect(dialog).toContainText("削除しますか");
+  await dialog.getByRole("button",{name:"キャンセル"}).click();
+  await expect(history).toBeVisible();
  });
 });

@@ -1,6 +1,6 @@
 import {NextRequest,NextResponse} from "next/server";
 import {z} from "zod";
-import {adminDb,requireAdmin} from "@/lib/firebase-admin";
+import {adminDb,requireAdmin,requireUser} from "@/lib/firebase-admin";
 import {applyMatchResult,assertStart,chooseMatch} from "@/lib/matching";
 import type {State} from "@/lib/types";
 export const runtime="nodejs";
@@ -12,8 +12,10 @@ const bodySchema=z.discriminatedUnion("action",[
 ]);
 export async function POST(request:NextRequest){
  try{
-  await requireAdmin(request.headers.get("authorization"));
   const body=bodySchema.parse(await request.json());
+  const header=request.headers.get("authorization");
+  if(body.action==="cancel")await requireAdmin(header);
+  else await requireUser(header);
   const ref=adminDb().doc("system/current");
   if(body.action==="preview"){
    const snap=await ref.get();const state=snap.data() as State|undefined;

@@ -21,10 +21,14 @@ function app(){
  return initializeApp({credential:serviceAccount?cert(serviceAccount):applicationDefault(),projectId});
 }
 export function adminDb(){app();return getFirestore()}
-export async function requireAdmin(header:string|null){
+export async function requireUser(header:string|null){
  if(!header?.startsWith("Bearer "))throw new Error("認証が必要です");
  app();
- const token=await getAuth().verifyIdToken(header.slice(7),true);
+ try{return await getAuth().verifyIdToken(header.slice(7),true);}
+ catch{throw new Error("認証情報が無効です。再読み込みしてお試しください");}
+}
+export async function requireAdmin(header:string|null){
+ const token=await requireUser(header);
  if(token.admin!==true||token.firebase.sign_in_provider==="anonymous")throw new Error("管理者権限が必要です");
  return token;
 }

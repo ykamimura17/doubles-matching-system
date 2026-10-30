@@ -75,3 +75,24 @@ button.danger-button:disabled{opacity:.45}
 /* The footer keeps its original active colors and a consistent icon footprint. */
 .mobile-bottom-nav .footer-nav-icon-slot{display:flex;align-items:center;justify-content:center;width:28px;height:28px;font-size:21px;line-height:1}
 .mobile-bottom-nav .footer-nav-icon{display:block;width:25px;height:25px;flex:none}
+/* Pair rows keep each player's name together and align each team's score. */
+.history-teams{display:grid;gap:0}
+.history-team-row{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:12px;align-items:center;padding:12px 0;min-width:0}
+.history-team-row+.history-team-row{border-top:1px solid #e3ebe0}
+.history-pair{display:flex;flex-wrap:wrap;gap:6px 14px;min-width:0;font-weight:700}
+.history-player,.history-list .history .history-player{display:inline-block;white-space:nowrap;max-width:100%;overflow-x:auto;vertical-align:middle;color:var(--ink);font-size:14px;margin:0}
+.history-list .history .history-team-score,.history-team-score{display:block;text-align:center;border-radius:10px;padding:5px 0;font-size:24px;font-variant-numeric:tabular-nums;color:var(--forest)}
+.history-team-winner{background:#e7f3dc}
+.history-actions{justify-content:flex-end}
+.history-actions button{min-height:44px}
+.history-dialog{width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow-y:auto;overscroll-behavior:contain;border:0;border-radius:20px;padding:24px;background:white;color:var(--ink);box-shadow:0 24px 70px #102d2440}
+.history-dialog::backdrop{background:rgba(10,28,22,.55)}
+.history-dialog .action-heading{align-items:flex-start;gap:12px}
+.history-dialog h3{margin:0;color:var(--forest);font-size:21px}
+.history-dialog .action-heading button{flex:none;min-height:44px}
+.history-dialog p{line-height:1.65}
+.history-team-label{display:block;margin-bottom:6px;font-size:12px;color:var(--muted)}
+.history-score-fields .history-team-row{grid-template-columns:minmax(0,1fr) 64px}
+.history-score-fields input{width:100%;min-width:0;min-height:48px;font-size:20px;text-align:center;border:1px solid #ccd8d1;border-radius:10px;padding:8px}
+.history-dialog .action-row button{min-height:48px}
+@media(max-width:900px){.history-dialog{padding:20px 18px}.history-dialog .action-row{flex-direction:column}.history-dialog .action-row button{width:100%}}
