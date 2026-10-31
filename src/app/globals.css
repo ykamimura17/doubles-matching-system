@@ -96,3 +96,7 @@ button.danger-button:disabled{opacity:.45}
 .history-score-fields input{width:100%;min-width:0;min-height:48px;font-size:20px;text-align:center;border:1px solid #ccd8d1;border-radius:10px;padding:8px}
 .history-dialog .action-row button{min-height:48px}
 @media(max-width:900px){.history-dialog{padding:20px 18px}.history-dialog .action-row{flex-direction:column}.history-dialog .action-row button{width:100%}}
+
+/* Single-player history filter stays within the panel on mobile. */
+.history-player-filter{display:grid;gap:8px;max-width:360px;font-size:14px;font-weight:650;color:var(--forest)}
+.history-player-filter select{width:100%;min-width:0;min-height:44px;padding:10px;border:1px solid #dce6d8;border-radius:10px;background:white;color:var(--ink)}

@@ -58,3 +58,28 @@ test.describe("選手",()=>{
   await expect(panel.getByRole('status')).toContainText('変更を保存しました');
  });
 });
+
+test("一般参加者も確認後に休憩・復帰を切り替えられる",async({page})=>{
+ await page.goto("/players?role=participant");
+ const panel=page.locator("#players");
+ await expect(panel.getByRole("button",{name:"田中を休憩にする",exact:true})).toBeDisabled();
+ await expect(panel.getByRole("button",{name:"森田を編集",exact:true})).toHaveCount(0);
+ await expect(panel.getByRole("link",{name:/プレイヤー登録/})).toHaveCount(0);
+ await expect(panel.getByRole("button",{name:"コート数設定",exact:true})).toHaveCount(0);
+ const dismissed=page.waitForEvent("dialog").then(async dialog=>{
+  expect(dialog.message()).toBe("森田を休憩にしますか？");await dialog.dismiss();
+ });
+ await panel.getByRole("button",{name:"森田を休憩にする",exact:true}).click();
+ await dismissed;
+ await expect(panel.getByRole("button",{name:"森田を休憩にする",exact:true})).toBeVisible();
+ const accepted=page.waitForEvent("dialog").then(dialog=>dialog.accept());
+ await panel.getByRole("button",{name:"森田を休憩にする",exact:true}).click();
+ await accepted;
+ await expect(panel.getByRole("status")).toContainText("森田を休憩にしました");
+ const returned=page.waitForEvent("dialog").then(async dialog=>{
+  expect(dialog.message()).toBe("森田を復帰（待機中）にしますか？");await dialog.accept();
+ });
+ await panel.getByRole("button",{name:"森田を復帰にする",exact:true}).click();
+ await returned;
+ await expect(panel.getByRole("status")).toContainText("森田を復帰（待機中）にしました");
+});

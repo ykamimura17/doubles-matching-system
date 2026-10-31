@@ -8,7 +8,7 @@ const statusLabels:Record<PlayerStatus,string>={waiting:'待機中',playing:'試
 const levels:Record<number,string>={1:'初級',2:'中級',3:'上級'};
 type Draft={name:string;level:number;status:'waiting'|'rest';comment:string};
 const initialDraft:Draft={name:'',level:2,status:'waiting',comment:''};
-export function PlayersPanel({state,admin,save}:{state:State;admin:boolean;save:(body:Record<string,unknown>)=>Promise<boolean>}){
+export function PlayersPanel({state,admin,canChangeStatus,save}:{state:State;admin:boolean;canChangeStatus:boolean;save:(body:Record<string,unknown>)=>Promise<boolean>}){
  const pathname=usePathname();
  const router=useRouter();
  const isRegistration=pathname==='/players/new';
@@ -35,7 +35,7 @@ export function PlayersPanel({state,admin,save}:{state:State;admin:boolean;save:
   }finally{setBusy(false)}
  }
  async function changeStatus(player:Player){
-  if(!admin||busy||player.status==='playing')return;
+  if(!canChangeStatus||busy||player.status==='playing')return;
   const status=player.status==='rest'?'waiting':'rest';
   const label=status==='rest'?'休憩':'復帰（待機中）';
   if(!window.confirm(`${player.name}を${label}にしますか？`))return;
@@ -52,12 +52,12 @@ export function PlayersPanel({state,admin,save}:{state:State;admin:boolean;save:
   <div className="players-filters" aria-label="状態で絞り込み">{(['all','waiting','playing','rest'] as const).map(key=><button key={key} type="button" aria-pressed={filter===key} onClick={()=>setFilter(key)}>{key==='all'?'すべて':statusLabels[key]}</button>)}</div>
   <h3 className="players-mobile-title">選手と参加状況 <small>・ 戦績：勝/負/分</small></h3>
   <div className="players-table" role="table" aria-label="選手一覧">
-   <div className="players-table-head" role="row">{['プレイヤー','レベル','状態','ポイント（勝/負/分）','試合数',...(admin?['操作']:[])].map(label=><span key={label} role="columnheader">{label}</span>)}</div>
+   <div className="players-table-head" role="row">{['プレイヤー','レベル','状態','ポイント（勝/負/分）','試合数',...(admin||canChangeStatus?['操作']:[])].map(label=><span key={label} role="columnheader">{label}</span>)}</div>
    {players.map(p=><div className="player player-row" role="row" key={p.id}>
     <div role="cell" className="player-identity"><span className="player-avatar" aria-hidden="true">{Array.from(p.name)[0]}</span><div><strong>{p.name}</strong><small className="mobile-player-detail">{levels[p.level]} ・ {statusLabels[p.status]}</small>{p.comment&&<small className="player-comment">{p.comment}</small>}</div></div>
     <span role="cell" className="desktop-player-detail">{levels[p.level]}</span><span role="cell" className="desktop-player-detail">{statusLabels[p.status]}</span>
     <div role="cell" className="player-record"><strong>{p.point} pt</strong><small>{p.win}/{p.lose}/{p.draw}</small></div><span role="cell" className="player-match-count">{p.matchCount}<span className="mobile-match-label"> 試合</span></span>
-    {admin&&<div role="cell" className="player-controls"><button type="button" className="secondary" disabled={p.status==='playing'||busy} onClick={()=>open('edit',p)} aria-label={`${p.name}を編集`}>編集</button><button type="button" className="secondary" disabled={p.status==='playing'||busy} onClick={()=>changeStatus(p)} aria-label={`${p.name}を${p.status==='rest'?'復帰':'休憩'}にする`}>{p.status==='rest'?'復帰':'休憩'}</button></div>}
+    {(admin||canChangeStatus)&&<div role="cell" className="player-controls">{admin&&<button type="button" className="secondary" disabled={p.status==='playing'||busy} onClick={()=>open('edit',p)} aria-label={`${p.name}を編集`}>編集</button>}{canChangeStatus&&<button type="button" className="secondary" disabled={p.status==='playing'||busy} onClick={()=>changeStatus(p)} aria-label={`${p.name}を${p.status==='rest'?'復帰':'休憩'}にする`}>{p.status==='rest'?'復帰':'休憩'}</button>}</div>}
    </div>)}
    {!players.length&&<div className="players-empty">{state.players.length?'該当する選手はいません':'選手がまだ登録されていません'}{admin&&!state.players.length&&<p>プレイヤー登録から参加者を追加してください。</p>}</div>}
   </div>
